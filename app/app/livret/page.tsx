@@ -1,0 +1,122 @@
+'use client';
+
+import { useState } from 'react';
+import { useCaseFile } from '@/lib/contexts/case-file-context';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { Loader2, Download, BookOpen } from 'lucide-react';
+
+const CONTENU = [
+  'Couverture personnalisée et mot d\'accueil',
+  'Profil, famille et personnes de confiance',
+  'Patrimoine : biens, comptes, dettes',
+  'Repères sur l\'indivision et la loi Letchimy',
+  'Documents, vie numérique et volontés',
+  'Objectifs, réunion familiale et plan d\'action',
+  'Résumé à partager avec un notaire ou un proche',
+];
+
+export default function LivretPage() {
+  const { activeCaseFile } = useCaseFile();
+  const [profile, setProfile] = useState<'anticipateur' | 'crise'>('anticipateur');
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleGenerate() {
+    if (!activeCaseFile) return;
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/pdf/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caseFileId: activeCaseFile.id, readerProfile: profile }),
+      });
+      if (!res.ok) {
+        const e = await res.json();
+        throw new Error(e.error || 'Erreur lors de la génération');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `livret-succession_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erreur lors de la génération');
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-widest text-gold mb-2">Votre livret</p>
+      <h1 className="font-serif text-3xl text-ink mb-2">Générer votre Livret de Succession</h1>
+      <p className="text-ink/70 mb-8 max-w-2xl">
+        Votre livret rassemble tout ce que vous avez renseigné, dans un document clair et soigné, prêt à
+        être conservé ou partagé.
+      </p>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-forest" /> Contenu de votre livret</CardTitle>
+          <CardDescription>24 pages, six sections.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="grid gap-2 md:grid-cols-2">
+            {CONTENU.map((c, i) => (
+              <li key={i} className="text-sm text-ink/70 flex items-start gap-2">
+                <span className="text-gold mt-1">•</span> {c}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Ton de l'ouverture</CardTitle>
+          <CardDescription>
+            Le contenu reste identique — seul le mot d'accueil s'adapte à votre situation.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex gap-3">
+          {(
+            [
+              ['anticipateur', 'J\'anticipe sereinement'],
+              ['crise', 'Je fais face à une situation'],
+            ] as const
+          ).map(([val, label]) => (
+            <button
+              key={val}
+              onClick={() => setProfile(val)}
+              className={cn(
+                'px-4 py-3 text-sm border transition-colors flex-1 text-left',
+                profile === val
+                  ? 'border-forest bg-ivory-dark text-forest font-medium'
+                  : 'border-ink/20 text-ink/70 hover:border-forest/50'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </CardContent>
+      </Card>
+
+      {error && <p className="text-sm text-red-700 mb-4">{error}</p>}
+
+      <Button size="lg" onClick={handleGenerate} disabled={generating || !activeCaseFile}>
+        {generating ? (
+          <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Génération en cours…</>
+        ) : (
+          <><Download className="h-5 w-5 mr-2" /> Générer et télécharger mon livret</>
+        )}
+      </Button>
+    </div>
+  );
+}

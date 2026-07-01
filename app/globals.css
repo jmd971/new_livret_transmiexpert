@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --forest: #1F3A1A;
+  --ivory: #F5EFE3;
+  --ink: #1A1712;
+  --gold: #C4982A;
+}
+
+body {
+  background-color: var(--ivory);
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+}
