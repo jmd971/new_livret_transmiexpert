@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { useCaseFile } from '@/lib/contexts/case-file-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -29,9 +30,19 @@ export default function LivretPage() {
     setGenerating(true);
     setError(null);
     try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Session expirée — reconnectez-vous pour générer votre livret.');
+      }
       const res = await fetch('/api/pdf/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ caseFileId: activeCaseFile.id, readerProfile: profile }),
       });
       if (!res.ok) {

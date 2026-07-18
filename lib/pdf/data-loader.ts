@@ -3,13 +3,32 @@ import type { CaseFileData } from './types';
 
 /**
  * Charge l'ensemble des données d'un dossier pour alimenter le générateur PDF.
- * Utilise la service_role key côté serveur uniquement (jamais exposée au client).
+ *
+ * Le client Supabase est créé avec la clé anonyme + le jeton de session de l'appelant :
+ * la RLS s'applique donc côté base, et un utilisateur ne peut lire que ses propres dossiers.
+ * (Remplace l'ancien montage service_role, qui contournait la RLS : n'importe qui connaissant
+ * un identifiant de dossier pouvait télécharger le livret d'autrui, et la génération échouait
+ * en « Dossier introuvable » dès que la clé service_role manquait dans l'environnement.)
  */
-export async function loadCaseFileData(caseFileId: string): Promise<CaseFileData> {
+export async function loadCaseFileData(caseFileId: string, accessToken: string): Promise<CaseFileData> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    }
   );
+
+  // Valide le jeton avant toute lecture : un jeton absent/expiré doit produire une erreur
+  // d'authentification claire, pas un « Dossier introuvable » trompeur.
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser(accessToken);
+  if (authError || !user) {
+    throw new Error('Session invalide ou expirée — reconnectez-vous.');
+  }
 
   const { data: caseFile, error } = await (supabase.from('case_files') as any)
     .select('*')

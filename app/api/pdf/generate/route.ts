@@ -7,6 +7,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    // Le jeton de session de l'appelant est obligatoire : les lectures se font sous RLS,
+    // un utilisateur ne peut donc générer que le livret de ses propres dossiers.
+    const authHeader = request.headers.get('authorization') || '';
+    const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Authentification requise.' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { caseFileId, readerProfile } = body as {
       caseFileId: string;
@@ -17,7 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'caseFileId requis' }, { status: 400 });
     }
 
-    const data = await loadCaseFileData(caseFileId);
+    const data = await loadCaseFileData(caseFileId, accessToken);
     const pdfBuffer = await generateUnifiedPDF(data, readerProfile);
 
     return new NextResponse(pdfBuffer as any, {
