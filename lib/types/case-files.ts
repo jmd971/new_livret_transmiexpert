@@ -90,12 +90,16 @@ export interface BankAccount {
   note?: string;
 }
 
+export type ClauseBeneficiaireStatut = 'a_jour' | 'a_verifier' | 'non_renseigne';
+
 export interface Insurance {
   id: string;
   case_file_id: string;
   type: string;
   company: string;
   contract_ref?: string;
+  clause_beneficiaire_statut?: ClauseBeneficiaireStatut;
+  clause_derniere_revision?: string;
   note?: string;
 }
 
@@ -168,6 +172,54 @@ export interface DigitalAsset {
   identifiant?: string;
   ou_trouver_acces: string;
   valeur_estimee?: number;
+  note?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// --- Nouveautés V4.1 — patrimoine étendu (cf. supabase/migrations/20260717000000_v4_1_patrimoine_etendu.sql) ---
+
+export type FormalisationDonation = 'notariee' | 'don_manuel' | 'non_precise';
+export type IndivisionSituation = 'apaisee' | 'en_discussion' | 'bloquee' | 'notaire_saisi' | 'non_precise';
+
+export interface BusinessInterest {
+  id: string;
+  case_file_id: string;
+  nom_entreprise: string;
+  forme_juridique?: string;
+  role?: string;
+  parts_detenues?: string;
+  associes?: string;
+  expert_comptable?: string;
+  devenir_souhaite?: string;
+  note?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PastDonation {
+  id: string;
+  case_file_id: string;
+  beneficiaire: string;
+  nature?: string;
+  date_donation?: string;
+  formalisation: FormalisationDonation;
+  valeur_estimee?: number;
+  note?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExistingIndivision {
+  id: string;
+  case_file_id: string;
+  bien: string;
+  localisation?: string;
+  origine?: string;
+  depuis_annee?: string;
+  co_indivisaires?: string;
+  situation: IndivisionSituation;
+  notaire_contact?: string;
   note?: string;
   created_at: string;
   updated_at: string;

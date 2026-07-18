@@ -11,6 +11,7 @@ const CONTENU = [
   'Couverture personnalisée et mot d\'accueil',
   'Profil, famille et personnes de confiance',
   'Patrimoine : biens, comptes, dettes',
+  'Entreprise, donations consenties et indivisions en cours',
   'Repères sur l\'indivision et la loi Letchimy',
   'Documents, vie numérique et volontés',
   'Objectifs, réunion familiale et plan d\'action',
@@ -65,7 +66,7 @@ export default function LivretPage() {
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-forest" /> Contenu de votre livret</CardTitle>
-          <CardDescription>24 pages, six sections.</CardDescription>
+          <CardDescription>27 pages, six sections.</CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="grid gap-2 md:grid-cols-2">

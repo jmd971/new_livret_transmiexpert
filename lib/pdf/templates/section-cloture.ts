@@ -1,5 +1,5 @@
 /**
- * SECTION CLÔTURE — pages 23 et 24
+ * SECTION CLÔTURE — pages 26 et 27
  *
  * La page de résumé est la plus "publique" du livret : c'est celle que le client montre
  * à un notaire ou à un héritier distant. Elle doit être irréprochable, autonome (compréhensible
@@ -31,6 +31,8 @@ export function generateSummaryPage(doc: PDFDoc, data: CaseFileData, pageNumber:
   y = addRestitutionField(doc, y, 'Nombre de biens recensés', String(data.properties.length));
   y = addRestitutionField(doc, y, 'Dettes estimées (total)', formatAmount(totalDebts));
   y = addRestitutionField(doc, y, 'Personnes de confiance désignées', String(data.trustPeople.length));
+  y = addRestitutionField(doc, y, 'Indivisions en cours', String(data.existingIndivisions.length));
+  y = addRestitutionField(doc, y, 'Donations déjà consenties', String(data.pastDonations.length));
 
   y += spacing.lg;
   doc.fontSize(fonts.size.small).font(fonts.heading).fillColor(colors.FOREST).text('À retenir', page.margin.left, y);

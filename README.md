@@ -21,16 +21,39 @@ a mis en évidence trois constats qui motivent une refonte de fond plutôt qu'un
    Décision actée : un seul document, avec une ouverture qui s'adapte au profil du lecteur
    (`ReaderProfile: 'crise' | 'anticipateur'`) plutôt que trois documents à maintenir.
 
-## Structure du contenu — 24 pages, 6 sections
+## Structure du contenu — 27 pages, 6 sections (V4.1)
 
 | Section | Pages | Contenu | Statut |
 |---|---|---|---|
 | Ouverture | 1–4 | Couverture personnalisée, mot d'accueil de Luc (adaptatif), tableau de bord de complétion, cadre de confiance | Réécrit |
 | Vous et les vôtres | 5–8 | Profil, famille, contacts clés, **personnes de confiance** | 1 page nouvelle |
-| Votre patrimoine | 9–13 | Vue d'ensemble, biens, comptes/contrats, dettes, **repères indivision & loi Letchimy** | 1 page nouvelle |
-| Documents & sécurité | 14–17 | Index documents, pièces à réunir, **vie numérique**, **volontés / urgence** | 2 pages nouvelles |
-| Décisions & méthode | 18–22 | Objectifs, décisions en cours, préparation réunion, compte-rendu, plan d'action | Réhabillé |
-| Clôture | 23–24 | Résumé exécutif à partager, contact TransmiExpert | Réécrit |
+| Votre patrimoine | 9–16 | Vue d'ensemble, biens, comptes/contrats (avec **clause bénéficiaire**), dettes, **entreprise & activité**, **donations consenties**, **indivisions en cours**, repères indivision & loi Letchimy | 3 pages nouvelles V4.1 |
+| Documents & sécurité | 17–20 | Index documents, pièces à réunir, **vie numérique**, **volontés / urgence** | 2 pages nouvelles |
+| Décisions & méthode | 21–25 | Objectifs, décisions en cours, préparation réunion, compte-rendu, plan d'action | Réhabillé |
+| Clôture | 26–27 | Résumé exécutif à partager, contact TransmiExpert | Réécrit |
+
+## Nouveautés V4.1 — patrimoine étendu
+
+Trois dimensions ajoutées au patrimoine, choisies pour renforcer le positionnement sans le diluer
+(migration : `supabase/migrations/20260717000000_v4_1_patrimoine_etendu.sql`, à exécuter sur la base V4) :
+
+1. **Entreprise & activité** (`business_interests`) — la transmission ne concerne pas que
+   l'immobilier ; essentiel pour les dirigeants et indépendants.
+2. **Donations déjà consenties** (`past_donations`) — le sujet le plus conflictuel d'une
+   succession, consigné factuellement ; l'articulation juridique (rapport, réduction) reste
+   explicitement renvoyée au notaire.
+3. **Indivisions en cours** (`existing_indivisions`) — le client antillais est très souvent
+   lui-même co-indivisaire d'un bien familial non réglé ; cette page précède le glossaire
+   Letchimy et le transforme en outil personnel.
+
+S'y ajoutent deux champs sur `insurances` (`clause_beneficiaire_statut`, `clause_derniere_revision`) :
+le statut de la clause bénéficiaire d'assurance-vie, premier actif hors succession en France,
+apparaît désormais dans le tableau des contrats.
+
+**Attention** : la V4.1 introduit une différence de schéma avec l'application d'origine
+(`transmiexpert-application`). Le branchement du générateur sur l'app existante nécessite
+désormais d'y appliquer aussi cette migration (les trois tables absentes font échouer
+`loadCaseFileData` — pas de dégradation silencieuse).
 
 ## Ce qui a changé concrètement
 
@@ -40,7 +63,7 @@ a mis en évidence trois constats qui motivent une refonte de fond plutôt qu'un
   `addLedgerTable`, `addPullQuote`, `addProgressBar`...) qui remplace les primitives de formulaire.
 - **`lib/pdf/types.ts`** — modèle de données strictement identique à l'application existante
   (aucune migration nécessaire), `PDFKind` supprimé au profit de `ReaderProfile`.
-- **`lib/pdf/templates/*`** — les 24 fonctions de génération de page, réparties par section.
+- **`lib/pdf/templates/*`** — les 27 fonctions de génération de page, réparties par section.
 - **`lib/pdf/generator.ts`** — orchestrateur, même signature publique que la V3
   (`generateUnifiedPDF(data): Promise<Buffer>`) pour un branchement à coût minimal.
 
@@ -55,14 +78,17 @@ a mis en évidence trois constats qui motivent une refonte de fond plutôt qu'un
 - [ ] Le glossaire indivision/loi Letchimy doit être revérifié à chaque évolution législative
       (la loi n° 2026-248 du 7 avril 2026 vient d'ores et déjà compléter la loi Letchimy de 2018 —
       à intégrer si pertinent).
-- [ ] Ce code n'a pas pu être exécuté ni rendu en PDF réel dans cet environnement (pas d'accès
-      réseau pour installer les dépendances). Une relecture visuelle après un premier rendu réel
-      est indispensable avant tout envoi à un client.
+- [x] ~~Ce code n'a pas pu être exécuté ni rendu en PDF réel~~ **Fait en V4.1** : rendu réel
+      exécuté avec un jeu de données fictif — 27 pages A4 conformes, contenu vérifié page par page.
+      Ce test a révélé et corrigé un bug bloquant : la pagination automatique de PDFKit générait
+      80 pages au lieu de 27 (marges du constructeur désormais à zéro, cf. `lib/pdf/generator.ts`).
+      Une relecture visuelle humaine du PDF reste recommandée avant tout envoi client.
 
 ## Intégration future (non faite ici)
 
-Pour brancher cette V4 sur l'application existante, il suffirait de remplacer le contenu de
-`lib/pdf/`, `lib/types/case-files.ts` restant inchangé, et de vérifier que
+Pour brancher cette V4.1 sur l'application existante : remplacer le contenu de `lib/pdf/`,
+reporter les ajouts de `lib/types/case-files.ts` (types V4.1), vérifier que
 `app/api/pdf/generate/route.ts` et `app/api/pdf/generate-direct/route.ts` appellent bien
-`generateUnifiedPDF(data)` avec la même signature. Aucune modification de schéma Supabase n'est
-requise pour les 24 pages telles que livrées ici.
+`generateUnifiedPDF(data)` avec la même signature, et appliquer la migration
+`20260717000000_v4_1_patrimoine_etendu.sql` sur la base cible (contrairement à la V4,
+la V4.1 modifie le schéma : trois tables et deux colonnes).
