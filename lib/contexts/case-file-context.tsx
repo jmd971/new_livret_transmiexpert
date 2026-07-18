@@ -27,6 +27,12 @@ export function CaseFileProvider({ children }: { children: React.ReactNode }) {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
+        // Pas de session : l'espace /app est réservé aux utilisateurs connectés.
+        // Sans cette redirection, les écrans attendent indéfiniment un dossier qui ne viendra jamais.
+        if (typeof window !== 'undefined') {
+          window.location.replace('/login');
+          return;
+        }
         setIsLoading(false);
         return;
       }

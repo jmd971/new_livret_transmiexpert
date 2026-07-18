@@ -43,10 +43,18 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCaseFile]);
 
-  if (isLoading || loading) {
+  if (isLoading || (activeCaseFile && loading)) {
     return (
       <div className="flex items-center gap-2 text-ink/50">
         <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
+      </div>
+    );
+  }
+
+  if (!activeCaseFile) {
+    return (
+      <div className="flex items-center gap-2 text-ink/50">
+        <Loader2 className="h-4 w-4 animate-spin" /> Initialisation de votre dossier…
       </div>
     );
   }
