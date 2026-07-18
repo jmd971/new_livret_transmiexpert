@@ -164,6 +164,7 @@ export function generateDashboardPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     ['Biens recensés', data.properties.length],
     ['Comptes et contrats indexés', data.bankAccounts.length + data.insurances.length],
     ['Documents indexés', data.documents.length],
+    ['Indivisions en cours', data.existingIndivisions.length],
   ];
 
   const colWidth = (page.width - page.margin.left - page.margin.right) / 2 - spacing.lg;

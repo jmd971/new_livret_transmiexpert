@@ -1,13 +1,35 @@
 /**
- * SECTION PATRIMOINE — pages 9 à 13
+ * SECTION PATRIMOINE — pages 9 à 16
  *
- * La page "Repères indivision & loi Letchimy" est NOUVELLE : c'est le glossaire local recommandé
+ * V4 : la page "Repères indivision & loi Letchimy" est le glossaire local recommandé
  * dans l'analyse de positionnement, pour neutraliser l'avantage de crédibilité juridique affiché
  * par les concurrents (GSA, AMAK) sans jamais faire de TransmiExpert un conseil juridique.
+ *
+ * V4.1 — trois pages nouvelles :
+ * - "Votre entreprise" (business_interests) : la transmission ne concerne pas que l'immobilier.
+ * - "Donations déjà consenties" (past_donations) : sujet le plus conflictuel d'une succession,
+ *   consigné factuellement pour servir la promesse d'apaisement.
+ * - "Vos indivisions en cours" (existing_indivisions) : le client antillais est très souvent
+ *   lui-même co-indivisaire d'un bien familial non réglé — cette page transforme le glossaire
+ *   Letchimy en outil personnel. Le glossaire la suit immédiatement.
+ * Le tableau des assurances affiche désormais le statut de la clause bénéficiaire.
  */
 
-import { PDF_THEME, formatAmount } from '../theme';
-import { addPageChrome, addPageTitle, addNarrativeBlock, addLedgerTable, addPostureNote } from '../components';
+import {
+  PDF_THEME,
+  formatAmount,
+  FORMALISATION_DONATION_LABELS,
+  INDIVISION_SITUATION_LABELS,
+  CLAUSE_BENEFICIAIRE_LABELS,
+} from '../theme';
+import {
+  addPageChrome,
+  addPageTitle,
+  addNarrativeBlock,
+  addLedgerTable,
+  addRestitutionField,
+  addPostureNote,
+} from '../components';
 import type { CaseFileData } from '../types';
 
 type PDFDoc = any;
@@ -30,6 +52,8 @@ export function generatePatrimonyOverviewPage(doc: PDFDoc, data: CaseFileData, p
     ['Comptes bancaires indexés', String(data.bankAccounts.length)],
     ['Contrats d’assurance', String(data.insurances.length)],
     ['Dettes estimées (total)', formatAmount(totalDebts)],
+    ['Entreprises et activités', String(data.businessInterests.length)],
+    ['Indivisions en cours', String(data.existingIndivisions.length)],
   ];
 
   const colWidth = (page.width - page.margin.left - page.margin.right) / 2 - spacing.lg;
@@ -87,10 +111,27 @@ export function generateAccountsPage(doc: PDFDoc, data: CaseFileData, pageNumber
   doc.fontSize(fonts.size.small).font(fonts.heading).fillColor(colors.FOREST).text('Assurances', page.margin.left, y);
   y = doc.y + spacing.sm;
 
-  const insuranceRows = data.insurances.map((i) => [i.type, i.company, i.contract_ref || '—', i.note || '—']);
-  addLedgerTable(doc, y, ['Type', 'Compagnie', 'N° de contrat', 'Notes'], insuranceRows, [100, 130, 120, 165], {
-    emptyMessage: 'Aucune assurance renseignée pour le moment.',
-  });
+  const insuranceRows = data.insurances.map((i) => [
+    i.type,
+    i.company,
+    i.contract_ref || '—',
+    CLAUSE_BENEFICIAIRE_LABELS[i.clause_beneficiaire_statut || 'non_renseigne'] || 'Non renseignée',
+    i.clause_derniere_revision || '—',
+  ]);
+  y = addLedgerTable(
+    doc,
+    y,
+    ['Type', 'Compagnie', 'N° de contrat', 'Clause bénéficiaire', 'Dernière révision'],
+    insuranceRows,
+    [80, 105, 90, 96, 90],
+    { emptyMessage: 'Aucune assurance renseignée pour le moment.' }
+  );
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    "En assurance-vie, la clause bénéficiaire détermine à qui revient le capital, en dehors de la succession. Une clause ancienne ou imprécise mérite d'être relue avec votre assureur ou votre notaire."
+  );
 }
 
 export function generateDebtsPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
@@ -107,6 +148,138 @@ export function generateDebtsPage(doc: PDFDoc, data: CaseFileData, pageNumber: n
   addLedgerTable(doc, y, ['Créancier', 'Montant estimé', 'Notes'], rows, [180, 130, 205], {
     emptyMessage: 'Aucune dette renseignée pour le moment.',
   });
+}
+
+/**
+ * NOUVELLE PAGE V4.1 — entreprise et activité professionnelle.
+ * Cœur de la promesse TransmiExpert : la transmission ne s'arrête pas à l'immobilier.
+ * Restitution factuelle ; le devenir souhaité est un vœu exprimé, jamais un acte.
+ */
+export function generateBusinessPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'Votre entreprise, votre activité',
+    mission: 'Ce que vous avez construit professionnellement — et ce que vous souhaitez pour la suite.',
+  });
+
+  if (data.businessInterests.length === 0) {
+    addNarrativeBlock(
+      doc,
+      y,
+      "Aucune entreprise ou activité professionnelle n'est renseignée pour le moment. Si vous êtes dirigeant, associé ou indépendant, cette page mérite d'être complétée : la transmission d'une activité se prépare tôt, et souvent mieux à froid."
+    );
+    return;
+  }
+
+  data.businessInterests.forEach((b) => {
+    y = addRestitutionField(doc, y, 'Entreprise', [b.nom_entreprise, b.forme_juridique].filter(Boolean).join(' — '));
+    y = addRestitutionField(doc, y, 'Votre rôle et vos parts', [b.role, b.parts_detenues].filter(Boolean).join(' · '));
+    y = addRestitutionField(doc, y, 'Associés', b.associes);
+    y = addRestitutionField(doc, y, 'Expert-comptable', b.expert_comptable);
+    y = addRestitutionField(doc, y, 'Devenir souhaité pour l’activité', b.devenir_souhaite);
+    y += spacing.lg;
+  });
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    "Le devenir d'une entreprise (cession, reprise familiale, dissolution) relève d'actes juridiques précis. Cette page consigne vos souhaits ; leur mise en œuvre se prépare avec votre expert-comptable et votre notaire."
+  );
+}
+
+/**
+ * NOUVELLE PAGE V4.1 — donations déjà consenties.
+ * Le rapport des donations est l'un des sujets les plus conflictuels d'une succession.
+ * Ton appliqué : strictement factuel, jamais de jugement sur les choix passés,
+ * et aucune interprétation juridique de leurs effets.
+ */
+export function generateDonationsPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'Donations déjà consenties',
+    mission: 'Ce qui a déjà été transmis, consigné noir sur blanc — pour que chacun parte des mêmes faits.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Les aides et donations passées font partie de l’histoire d’une famille. Les consigner ici, factuellement, évite les souvenirs divergents le jour où la succession s’ouvre.'
+  );
+
+  const rows = data.pastDonations.map((d) => [
+    d.beneficiaire,
+    d.nature || '—',
+    d.date_donation || '—',
+    FORMALISATION_DONATION_LABELS[d.formalisation] || d.formalisation,
+    d.valeur_estimee ? formatAmount(d.valeur_estimee) : '—',
+  ]);
+
+  addLedgerTable(
+    doc,
+    y + spacing.sm,
+    ['Bénéficiaire', 'Nature', 'Date', 'Formalisation', 'Valeur estimée'],
+    rows,
+    [105, 100, 70, 96, 90],
+    { emptyMessage: 'Aucune donation consignée pour le moment.' }
+  );
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'La manière dont ces donations s’articulent avec la succession (rapport, réduction, dispense) relève exclusivement de l’analyse du notaire. Cette page recense des faits, elle n’en tire aucune conséquence juridique.'
+  );
+}
+
+/**
+ * NOUVELLE PAGE V4.1 — indivisions en cours.
+ * Aux Antilles, le client est très souvent lui-même co-indivisaire d'un bien familial non réglé.
+ * Cette page documente sa situation personnelle ; le glossaire qui suit (page suivante)
+ * lui donne les repères de vocabulaire.
+ */
+export function generateExistingIndivisionsPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'Vos indivisions en cours',
+    mission: 'Les biens familiaux dont vous êtes déjà co-indivisaire — souvent le vrai point de départ.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Beaucoup de successions commencent avant même de commencer : par un bien hérité resté en indivision, parfois depuis des années. Poser la situation par écrit est la première étape pour la faire avancer.'
+  );
+
+  const rows = data.existingIndivisions.map((i) => [
+    [i.bien, i.localisation].filter(Boolean).join(' — '),
+    i.origine || '—',
+    i.co_indivisaires || '—',
+    i.depuis_annee || '—',
+    INDIVISION_SITUATION_LABELS[i.situation] || i.situation,
+  ]);
+
+  addLedgerTable(
+    doc,
+    y + spacing.sm,
+    ['Bien', 'Origine', 'Co-indivisaires', 'Depuis', 'Situation'],
+    rows,
+    [115, 85, 125, 50, 86],
+    { emptyMessage: 'Aucune indivision renseignée pour le moment.' }
+  );
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Les repères de vocabulaire (indivision, loi Letchimy, sortie d’indivision) sont rassemblés à la page suivante. Pour toute démarche, votre notaire reste l’interlocuteur de référence.'
+  );
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * SECTION DÉCISIONS & MÉTHODE — pages 18 à 22
+ * SECTION DÉCISIONS & MÉTHODE — pages 21 à 25
  *
  * Ces pages n'ont pas de table dédiée dans le modèle de données actuel (elles restent, comme en V3,
  * des pages de méthode que le client remplit à la main ou complète numériquement au fil de son

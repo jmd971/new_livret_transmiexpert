@@ -159,6 +159,28 @@ export const CHOIX_FUNERAIRE_LABELS: Record<string, string> = {
   non_defini: 'Non précisé',
 };
 
+// --- Libellés V4.1 — patrimoine étendu ---
+
+export const FORMALISATION_DONATION_LABELS: Record<string, string> = {
+  notariee: 'Notariée',
+  don_manuel: 'Don manuel',
+  non_precise: 'Non précisé',
+};
+
+export const INDIVISION_SITUATION_LABELS: Record<string, string> = {
+  apaisee: 'Apaisée',
+  en_discussion: 'En discussion',
+  bloquee: 'Bloquée',
+  notaire_saisi: 'Notaire saisi',
+  non_precise: 'Non précisé',
+};
+
+export const CLAUSE_BENEFICIAIRE_LABELS: Record<string, string> = {
+  a_jour: 'À jour',
+  a_verifier: 'À vérifier',
+  non_renseigne: 'Non renseignée',
+};
+
 export const STATUT_CONJUGAL_LABELS: Record<string, string> = {
   celibataire: 'Célibataire',
   concubinage: 'En concubinage',

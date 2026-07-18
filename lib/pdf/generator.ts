@@ -33,6 +33,9 @@ import {
   generatePropertiesPage,
   generateAccountsPage,
   generateDebtsPage,
+  generateBusinessPage,
+  generateDonationsPage,
+  generateExistingIndivisionsPage,
   generateIndivisionGlossaryPage,
 } from './templates/section-patrimoine';
 
@@ -58,12 +61,12 @@ type PDFDoc = any;
 function buildDocument(data: CaseFileData, readerProfile: ReaderProfile = 'anticipateur'): PDFDoc {
   const doc: PDFDoc = new (PDFDocument as any)({
     size: [PDF_THEME.page.width, PDF_THEME.page.height],
-    margins: {
-      top: PDF_THEME.page.margin.top,
-      bottom: PDF_THEME.page.margin.bottom,
-      left: PDF_THEME.page.margin.left,
-      right: PDF_THEME.page.margin.right,
-    },
+    // Marges PDFKit à zéro, volontairement : la mise en page est entièrement manuelle
+    // (PDF_THEME.page.margin est appliqué par les templates). Avec des marges non nulles,
+    // PDFKit insère une page automatique dès qu'un texte est posé sous la marge basse —
+    // or le pied de page (addPageChrome) est dessiné à ~50pt du bord physique, ce qui
+    // générait une page fantôme par page réelle (80 pages au lieu de 27).
+    margins: { top: 0, bottom: 0, left: 0, right: 0 },
     autoFirstPage: false, // chaque page est ouverte explicitement par les fonctions generateXPage
     info: {
       Title: 'Livret de Succession — TransmiExpert',
@@ -85,27 +88,30 @@ function buildDocument(data: CaseFileData, readerProfile: ReaderProfile = 'antic
   generateContactsPage(doc, data, ++p);
   generateTrustPeoplePage(doc, data, ++p); // NOUVEAU
 
-  // --- Votre patrimoine (pages 9-13) ---
+  // --- Votre patrimoine (pages 9-16) ---
   generatePatrimonyOverviewPage(doc, data, ++p);
   generatePropertiesPage(doc, data, ++p);
-  generateAccountsPage(doc, data, ++p);
+  generateAccountsPage(doc, data, ++p); // clause bénéficiaire ajoutée en V4.1
   generateDebtsPage(doc, data, ++p);
-  generateIndivisionGlossaryPage(doc, data, ++p); // NOUVEAU
+  generateBusinessPage(doc, data, ++p); // NOUVEAU V4.1
+  generateDonationsPage(doc, data, ++p); // NOUVEAU V4.1
+  generateExistingIndivisionsPage(doc, data, ++p); // NOUVEAU V4.1
+  generateIndivisionGlossaryPage(doc, data, ++p); // NOUVEAU V4 — suit la page d'indivisions personnelles
 
-  // --- Documents & sécurité (pages 14-17) ---
+  // --- Documents & sécurité (pages 17-20) ---
   generateDocumentsIndexPage(doc, data, ++p);
   generateMissingDocumentsPage(doc, data, ++p);
   generateDigitalLifePage(doc, data, ++p); // NOUVEAU
   generateEmergencyPage(doc, data, ++p); // NOUVEAU
 
-  // --- Décisions & méthode (pages 18-22) ---
+  // --- Décisions & méthode (pages 21-25) ---
   generateObjectivesPage(doc, data, ++p);
   generateDecisionsPage(doc, data, ++p);
   generateFamilyMeetingPage(doc, data, ++p);
   generateMeetingReportPage(doc, data, ++p);
   generateActionPlanPage(doc, data, ++p);
 
-  // --- Clôture (pages 23-24) ---
+  // --- Clôture (pages 26-27) ---
   generateSummaryPage(doc, data, ++p);
   generateClosingPage(doc, data, ++p);
 

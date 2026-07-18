@@ -1,5 +1,5 @@
 /**
- * SECTION DOCUMENTS & SÉCURITÉ — pages 14 à 17
+ * SECTION DOCUMENTS & SÉCURITÉ — pages 17 à 20
  *
  * Les pages "Votre vie numérique" et "En cas d'urgence" sont NOUVELLES et touchent à des sujets
  * sensibles (accès numériques après un décès, dispositions funéraires). Cadrage de ton appliqué :

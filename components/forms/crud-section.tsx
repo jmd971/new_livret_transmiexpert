@@ -19,7 +19,8 @@ import { Plus, Trash2, Loader2 } from 'lucide-react';
 export type FieldDef = {
   key: string;
   label: string;
-  type?: 'text' | 'number';
+  type?: 'text' | 'number' | 'select';
+  options?: Array<{ value: string; label: string }>; // requis si type === 'select'
   placeholder?: string;
   required?: boolean;
 };
@@ -94,7 +95,11 @@ export function CrudSection({ table, title, kicker, intro, fields, emptyMessage 
                   {fields.map((f) => (
                     <div key={f.key} className="text-sm">
                       <span className="text-ink/50">{f.label} : </span>
-                      <span className="text-ink">{row[f.key] ?? '—'}</span>
+                      <span className="text-ink">
+                        {f.options
+                          ? f.options.find((o) => o.value === row[f.key])?.label ?? row[f.key] ?? '—'
+                          : row[f.key] ?? '—'}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -113,13 +118,29 @@ export function CrudSection({ table, title, kicker, intro, fields, emptyMessage 
             {fields.map((f) => (
               <div key={f.key} className="grid gap-1.5">
                 <Label htmlFor={f.key}>{f.label}</Label>
-                <Input
-                  id={f.key}
-                  type={f.type === 'number' ? 'number' : 'text'}
-                  placeholder={f.placeholder}
-                  value={form[f.key] || ''}
-                  onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                />
+                {f.type === 'select' && f.options ? (
+                  <select
+                    id={f.key}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={form[f.key] || ''}
+                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                  >
+                    <option value="">— Choisir —</option>
+                    {f.options.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <Input
+                    id={f.key}
+                    type={f.type === 'number' ? 'number' : 'text'}
+                    placeholder={f.placeholder}
+                    value={form[f.key] || ''}
+                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                  />
+                )}
               </div>
             ))}
             <div className="flex gap-3 pt-2">

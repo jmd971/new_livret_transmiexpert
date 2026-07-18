@@ -25,6 +25,9 @@ export default function DashboardPage() {
         'debts',
         'documents_index',
         'digital_assets',
+        'business_interests',
+        'past_donations',
+        'existing_indivisions',
       ];
       const results = await Promise.all(
         tables.map((t) =>
@@ -56,6 +59,9 @@ export default function DashboardPage() {
     ['Comptes & assurances', String((counts['accounts'] ?? 0) + (counts['insurances'] ?? 0))],
     ['Dettes', String(counts['debts'] ?? 0)],
     ['Documents indexés', String(counts['documents_index'] ?? 0)],
+    ['Entreprises & activités', String(counts['business_interests'] ?? 0)],
+    ['Donations consenties', String(counts['past_donations'] ?? 0)],
+    ['Indivisions en cours', String(counts['existing_indivisions'] ?? 0)],
   ];
 
   return (

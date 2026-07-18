@@ -36,6 +36,9 @@ export async function loadCaseFileData(caseFileId: string): Promise<CaseFileData
     { data: funeralWishes },
     { data: emergencyChecklist },
     { data: digitalAssets },
+    { data: businessInterests },
+    { data: pastDonations },
+    { data: existingIndivisions },
   ] = await Promise.all([
     q1('identity_profile'),
     q1('family_context'),
@@ -50,6 +53,9 @@ export async function loadCaseFileData(caseFileId: string): Promise<CaseFileData
     q1('funeral_wishes'),
     q('emergency_checklist'),
     q('digital_assets'),
+    q('business_interests'),
+    q('past_donations'),
+    q('existing_indivisions'),
   ]);
 
   return {
@@ -67,5 +73,8 @@ export async function loadCaseFileData(caseFileId: string): Promise<CaseFileData
     funeralWishes: funeralWishes || undefined,
     emergencyChecklist: emergencyChecklist || [],
     digitalAssets: digitalAssets || [],
+    businessInterests: businessInterests || [],
+    pastDonations: pastDonations || [],
+    existingIndivisions: existingIndivisions || [],
   };
 }
