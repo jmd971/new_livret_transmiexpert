@@ -194,12 +194,20 @@ export function formatAmount(amount: number | string | null | undefined): string
   if (amount === null || amount === undefined) return '—';
   const numAmount = typeof amount === 'string' ? parseFloat(amount.replace(/\s/g, '')) : amount;
   if (isNaN(numAmount)) return '—';
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(numAmount);
+  return (
+    new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })
+      .format(numAmount)
+      // Les espaces fines insécables (séparateur de milliers fr-FR) n'existent pas dans
+      // l'encodage WinAnsi des polices standard PDFKit et se rendaient en « / »
+      // (« 12 /000 € »). On les remplace par une espace insécable classique, présente
+      // dans WinAnsi.
+      .replace(/[\u202F\u00A0]/g, '\u00A0')
+  );
 }
 
 export function formatDate(dateStr: string | null | undefined): string {
