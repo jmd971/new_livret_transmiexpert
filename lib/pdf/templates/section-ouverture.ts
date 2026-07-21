@@ -17,6 +17,8 @@ import {
   addPullQuote,
   addPostureNote,
   addWatermark,
+  addRestitutionField,
+  isBlankMode,
 } from '../components';
 import type { CaseFileData, ReaderProfile } from '../types';
 
@@ -55,9 +57,25 @@ export function generateCoverPage(doc: PDFDoc, data: CaseFileData) {
     .fontSize(fonts.size.large)
     .font(fonts.italic)
     .fillColor(colors.FOREST)
-    .text('Pack Sérénité · Dossier personnel', 0, 360, { width: page.width, align: 'center' });
+    .text(isBlankMode() ? 'Pack Sérénité · Édition papier' : 'Pack Sérénité · Dossier personnel', 0, 360, {
+      width: page.width,
+      align: 'center',
+    });
 
-  if (ownerName) {
+  if (isBlankMode()) {
+    // Ligne de propriété à compléter à la main — remplace le « Préparé pour X » de l'édition personnalisée.
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text('CE LIVRET APPARTIENT À', 0, 432, { width: page.width, align: 'center', characterSpacing: 1 });
+    doc
+      .strokeColor(colors.BORDER)
+      .lineWidth(0.5)
+      .moveTo(centerX - 110, 476)
+      .lineTo(centerX + 110, 476)
+      .stroke();
+  } else if (ownerName) {
     doc
       .fontSize(fonts.size.medium)
       .font(fonts.body)
@@ -65,14 +83,16 @@ export function generateCoverPage(doc: PDFDoc, data: CaseFileData) {
       .text(`Préparé pour ${ownerName}`, 0, 440, { width: page.width, align: 'center' });
   }
 
-  doc
-    .fontSize(fonts.size.tiny)
-    .font(fonts.body)
-    .fillColor(colors.GREY)
-    .text(`Généré le ${formatDate(new Date().toISOString())}`, 0, page.height - 110, {
-      width: page.width,
-      align: 'center',
-    });
+  if (!isBlankMode()) {
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text(`Généré le ${formatDate(new Date().toISOString())}`, 0, page.height - 110, {
+        width: page.width,
+        align: 'center',
+      });
+  }
 
   doc
     .strokeColor(colors.GOLD)
@@ -109,7 +129,10 @@ export function generateWelcomePage(
       "Vous avez fait le choix, rare et précieux, de vous en occuper avant que la situation ne l'impose. Ce livret rassemble ce que vous nous avez confié — votre famille, votre patrimoine, vos volontés — dans un seul document que vous pourrez enrichir, partager ou simplement garder à portée de main.",
   };
 
-  y = addNarrativeBlock(doc, y, openingByProfile[readerProfile]);
+  const blankOpening =
+    "Ce livret est le vôtre. Page après page, il vous invite à consigner ce qui compte — votre famille, votre patrimoine, vos volontés — dans un seul document que vous pourrez enrichir à votre rythme, partager ou simplement garder à portée de main.";
+
+  y = addNarrativeBlock(doc, y, isBlankMode() ? blankOpening : openingByProfile[readerProfile]);
   y += spacing.md;
 
   y = addPullQuote(
@@ -128,11 +151,17 @@ export function generateWelcomePage(
     .text('Comment lire ce livret', page.margin.left, y);
   y = doc.y + spacing.sm;
 
-  const bullets = [
-    'Chaque section restitue ce que vous avez déjà renseigné dans votre espace personnel.',
-    "Les mentions « à compléter » ne sont jamais un jugement — c'est une invitation à revenir enrichir votre dossier quand vous le souhaitez.",
-    'La dernière page rassemble un résumé à partager, si vous le souhaitez, avec un proche ou un notaire.',
-  ];
+  const bullets = isBlankMode()
+    ? [
+        "Chaque section vous guide, thème par thème : remplissez ce que vous savez, laissez le reste pour plus tard.",
+        "Écrivez au crayon si vous préférez : un livret vivant se corrige et s'enrichit au fil du temps.",
+        'La dernière page rassemble un résumé à partager, si vous le souhaitez, avec un proche ou un notaire.',
+      ]
+    : [
+        'Chaque section restitue ce que vous avez déjà renseigné dans votre espace personnel.',
+        "Les mentions « à compléter » ne sont jamais un jugement — c'est une invitation à revenir enrichir votre dossier quand vous le souhaitez.",
+        'La dernière page rassemble un résumé à partager, si vous le souhaitez, avec un proche ou un notaire.',
+      ];
   bullets.forEach((b) => {
     doc.circle(page.margin.left + 3, y + 6, 2).fill(colors.GOLD);
     doc
@@ -150,9 +179,26 @@ export function generateDashboardPage(doc: PDFDoc, data: CaseFileData, pageNumbe
 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre situation en un regard',
-    title: 'Où en est votre dossier',
-    mission: 'Un repère, pas une note — pour savoir ce qui est déjà solide et ce qui peut encore être enrichi.',
+    title: isBlankMode() ? 'Votre livret, à votre rythme' : 'Où en est votre dossier',
+    mission: isBlankMode()
+      ? 'Quelques repères à tenir à jour — pour vous, et pour ceux qui ouvriront ce livret un jour.'
+      : 'Un repère, pas une note — pour savoir ce qui est déjà solide et ce qui peut encore être enrichi.',
   });
+
+  if (isBlankMode()) {
+    // Sur papier, ni score ni compteurs : des repères de suivi à compléter à la main.
+    y = addRestitutionField(doc, y, 'Livret commencé le', undefined);
+    y = addRestitutionField(doc, y, 'Dernière mise à jour le', undefined);
+    y = addRestitutionField(doc, y, 'Où ce livret est conservé', undefined);
+    y = addRestitutionField(doc, y, 'Personnes informées de son existence', undefined);
+    y += spacing.md;
+    addNarrativeBlock(
+      doc,
+      y,
+      "Ce livret évolue avec vous. Datez vos mises à jour, et dites à une personne de confiance où il se trouve : un livret que personne ne sait trouver ne protège personne."
+    );
+    return;
+  }
 
   const score = data.caseFile?.completion_score ?? 0;
   y = addProgressBar(doc, y, score, 'Taux de complétion de votre dossier');
@@ -206,7 +252,9 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   y = addNarrativeBlock(
     doc,
     y,
-    "Ce document rassemble et organise les informations que vous nous avez confiées. Il vous aide à préparer un rendez-vous, une réunion familiale, ou simplement à garder une vue d'ensemble claire de votre situation."
+    isBlankMode()
+      ? "Ce document rassemble et organise les informations que vous choisirez d'y consigner. Il vous aide à préparer un rendez-vous, une réunion familiale, ou simplement à garder une vue d'ensemble claire de votre situation."
+      : "Ce document rassemble et organise les informations que vous nous avez confiées. Il vous aide à préparer un rendez-vous, une réunion familiale, ou simplement à garder une vue d'ensemble claire de votre situation."
   );
 
   y += spacing.sm;

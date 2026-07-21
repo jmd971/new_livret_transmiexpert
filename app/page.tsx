@@ -14,6 +14,12 @@ export default function HomePage() {
         <Button asChild size="lg"><Link href="/app/dashboard">Accéder à mon espace</Link></Button>
         <Button asChild size="lg" variant="outline"><Link href="/login">Se connecter</Link></Button>
       </div>
+      <Link
+        href="/tarifs"
+        className="mt-6 text-sm text-forest underline underline-offset-4 hover:text-gold transition-colors"
+      >
+        Découvrir nos tarifs
+      </Link>
       <p className="mt-12 text-xs text-ink/50 max-w-md">
         TransmiExpert n'est ni notaire, ni avocat, ni expert-comptable. Tiers neutre en médiation successorale.
       </p>
