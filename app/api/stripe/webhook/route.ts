@@ -50,8 +50,13 @@ export async function POST(request: NextRequest) {
       return;
     }
 
-    const priceId = sub.items.data[0]?.price?.id || '';
-    const periodEnd = (sub as any).current_period_end as number | undefined;
+    const item = sub.items.data[0];
+    const priceId = item?.price?.id || '';
+    // current_period_end vit sur l'abonnement dans les anciennes versions d'API, et sur la
+    // ligne d'abonnement depuis 2025-03-31.basil (dont 2026-03-25.dahlia) : on lit les deux.
+    const periodEnd =
+      ((sub as any).current_period_end as number | undefined) ??
+      ((item as any)?.current_period_end as number | undefined);
 
     await admin.from('subscriptions').upsert({
       user_id: userId,
