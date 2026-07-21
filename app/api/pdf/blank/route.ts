@@ -13,11 +13,11 @@ export const dynamic = 'force-dynamic';
  * abonnés (le produit vendu est le livret papier, pas le PDF). La liste des comptes
  * autorisés est surchargeable via BLANK_PDF_ALLOWED_EMAILS (emails séparés par des virgules).
  */
-const DEFAULT_ALLOWED_EMAILS = ['jdolmare@gmail.com', 'luc@transmiexpert.fr'];
+import { TEAM_EMAILS } from '@/lib/team';
 
 function allowedEmails(): string[] {
   const fromEnv = process.env.BLANK_PDF_ALLOWED_EMAILS;
-  if (!fromEnv) return DEFAULT_ALLOWED_EMAILS;
+  if (!fromEnv) return TEAM_EMAILS;
   return fromEnv.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 }
 

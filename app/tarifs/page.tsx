@@ -11,6 +11,7 @@ export const metadata = {
 
 const ABONNEMENTS = [
   {
+    id: 'essentiel',
     nom: 'Essentiel',
     prix: '9,90 €',
     periode: '/ mois',
@@ -25,6 +26,7 @@ const ABONNEMENTS = [
     misEnAvant: false,
   },
   {
+    id: 'accompagne',
     nom: 'Accompagné',
     prix: '14,90 €',
     periode: '/ mois',
@@ -89,7 +91,7 @@ export default function TarifsPage() {
               </ul>
               <p className="text-xs text-ink/50 italic">{a.precision}</p>
               <Button asChild variant={a.misEnAvant ? 'default' : 'outline'}>
-                <Link href="/login">Commencer</Link>
+                <Link href={`/abonnement?plan=${a.id}`}>S'abonner</Link>
               </Button>
             </CardContent>
           </Card>
