@@ -7,10 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Loader2, Download, BookOpen, Printer } from 'lucide-react';
-
-// Comptes équipe autorisés à télécharger le fichier d'impression de l'édition vierge
-// (simple confort d'affichage — le contrôle d'accès réel est fait par l'API /api/pdf/blank).
-const TEAM_EMAILS = ['jdolmare@gmail.com', 'luc@transmiexpert.fr'];
+// Affichage seulement — le contrôle d'accès réel est fait par l'API /api/pdf/blank.
+import { TEAM_EMAILS } from '@/lib/team';
 
 const CONTENU = [
   'Couverture personnalisée et mot d\'accueil',

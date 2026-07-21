@@ -1,9 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { loadCaseFileData } from '@/lib/pdf/data-loader';
 import { generateUnifiedPDF } from '@/lib/pdf/generator';
+import { isTeamEmail } from '@/lib/team';
+import { ACTIVE_STATUSES } from '@/lib/subscription-shared';
 import type { ReaderProfile } from '@/lib/pdf/types';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * Contrôle d'abonnement côté serveur — le garde client (SubscriptionGate) n'est
+ * que de l'UX. La génération du livret est le cœur payant du produit : sans
+ * abonnement actif (et hors comptes équipe), on refuse. Lecture sous RLS avec
+ * le jeton de l'appelant : chacun ne peut lire que sa propre ligne.
+ */
+async function checkSubscription(accessToken: string): Promise<NextResponse | null> {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    }
+  );
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(accessToken);
+  if (!user) return NextResponse.json({ error: 'Session invalide ou expirée.' }, { status: 401 });
+  if (isTeamEmail(user.email)) return null;
+
+  const { data } = await (supabase.from('subscriptions') as any)
+    .select('status')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (!data?.status || !ACTIVE_STATUSES.includes(data.status)) {
+    return NextResponse.json(
+      { error: 'La génération du livret est réservée aux abonnés. Rendez-vous sur la page tarifs pour vous abonner.' },
+      { status: 402 }
+    );
+  }
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +61,9 @@ export async function POST(request: NextRequest) {
     if (!caseFileId) {
       return NextResponse.json({ error: 'caseFileId requis' }, { status: 400 });
     }
+
+    const refusal = await checkSubscription(accessToken);
+    if (refusal) return refusal;
 
     const data = await loadCaseFileData(caseFileId, accessToken);
     const pdfBuffer = await generateUnifiedPDF(data, readerProfile);

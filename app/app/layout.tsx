@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CaseFileProvider } from '@/lib/contexts/case-file-context';
+import { SubscriptionGate, ManageSubscriptionLink } from '@/components/subscription';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -37,6 +38,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <CaseFileProvider>
+      <SubscriptionGate>
       <div className="min-h-screen flex">
         <aside className="w-64 shrink-0 border-r border-gold/30 bg-white flex flex-col">
           <div className="p-5 border-b border-gold/20">
@@ -62,14 +64,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-          <div className="p-5 border-t border-gold/20 text-xs text-ink/50">
-            Ni notaire ni avocat — tiers neutre.
+          <div className="p-5 border-t border-gold/20 text-xs text-ink/50 space-y-2">
+            <ManageSubscriptionLink className="text-forest hover:text-gold transition-colors underline underline-offset-2" />
+            <p>Ni notaire ni avocat — tiers neutre.</p>
           </div>
         </aside>
         <main className="flex-1 overflow-auto">
           <div className="max-w-4xl mx-auto px-8 py-10">{children}</div>
         </main>
       </div>
+      </SubscriptionGate>
     </CaseFileProvider>
   );
 }
