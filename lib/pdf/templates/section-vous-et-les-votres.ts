@@ -14,6 +14,8 @@ import {
   addRestitutionGrid,
   addLedgerTable,
   addPostureNote,
+  addWritingLines,
+  isBlankMode,
 } from '../components';
 import type { CaseFileData } from '../types';
 
@@ -70,12 +72,21 @@ export function generateFamilyPage(doc: PDFDoc, data: CaseFileData, pageNumber: 
     mission: 'Pour apaiser les échanges : on clarifie qui est concerné, et comment on communique.',
   });
 
-  y = addNarrativeBlock(
-    doc,
-    y,
-    data.familyContext?.notes ||
-      "Les notes sur votre situation familiale apparaîtront ici une fois renseignées dans votre espace personnel."
-  );
+  if (isBlankMode()) {
+    y = addNarrativeBlock(
+      doc,
+      y,
+      'Notez ici ce qui compose votre famille : vos enfants, les liens particuliers, les situations que vos proches devraient connaître.'
+    );
+    y = addWritingLines(doc, y, 4);
+  } else {
+    y = addNarrativeBlock(
+      doc,
+      y,
+      data.familyContext?.notes ||
+        "Les notes sur votre situation familiale apparaîtront ici une fois renseignées dans votre espace personnel."
+    );
+  }
 
   y += spacing.lg;
 
@@ -135,7 +146,9 @@ export function generateTrustPeoplePage(doc: PDFDoc, data: CaseFileData, pageNum
   y = addNarrativeBlock(
     doc,
     y,
-    'Ces personnes ont été identifiées par vous comme des interlocuteurs de confiance pour votre entourage, en complément — jamais en remplacement — des démarches notariales.'
+    isBlankMode()
+      ? 'Notez ici les personnes en qui vous avez toute confiance pour accompagner votre entourage, en complément — jamais en remplacement — des démarches notariales.'
+      : 'Ces personnes ont été identifiées par vous comme des interlocuteurs de confiance pour votre entourage, en complément — jamais en remplacement — des démarches notariales.'
   );
 
   const rows = data.trustPeople.map((p) => [

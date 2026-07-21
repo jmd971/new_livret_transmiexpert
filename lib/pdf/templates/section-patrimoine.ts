@@ -29,7 +29,9 @@ import {
   addLedgerTable,
   addRestitutionField,
   addPostureNote,
+  isBlankMode,
 } from '../components';
+import type { BusinessInterest } from '../types';
 import type { CaseFileData } from '../types';
 
 type PDFDoc = any;
@@ -62,6 +64,13 @@ export function generatePatrimonyOverviewPage(doc: PDFDoc, data: CaseFileData, p
     const row = Math.floor(i / 2);
     const x = page.margin.left + col * (colWidth + spacing.xl * 1.5);
     const rowY = y + row * 64;
+
+    if (isBlankMode()) {
+      // Édition vierge : une courte ligne d'écriture à la place du chiffre.
+      doc.strokeColor(colors.BORDER).lineWidth(0.5).moveTo(x, rowY + 22).lineTo(x + 44, rowY + 22).stroke();
+      doc.fontSize(fonts.size.small).font(fonts.body).fillColor(colors.GREY).text(label, x, rowY + 30, { width: colWidth });
+      return;
+    }
 
     doc.fontSize(fonts.size.xlarge).font(fonts.heading).fillColor(colors.FOREST).text(value, x, rowY);
     doc.fontSize(fonts.size.small).font(fonts.body).fillColor(colors.GREY).text(label, x, doc.y + 4, { width: colWidth });
@@ -165,7 +174,7 @@ export function generateBusinessPage(doc: PDFDoc, data: CaseFileData, pageNumber
     mission: 'Ce que vous avez construit professionnellement — et ce que vous souhaitez pour la suite.',
   });
 
-  if (data.businessInterests.length === 0) {
+  if (data.businessInterests.length === 0 && !isBlankMode()) {
     addNarrativeBlock(
       doc,
       y,
@@ -174,7 +183,12 @@ export function generateBusinessPage(doc: PDFDoc, data: CaseFileData, pageNumber
     return;
   }
 
-  data.businessInterests.forEach((b) => {
+  // Édition vierge : deux blocs à remplir à la main (les champs deviennent des lignes d'écriture).
+  const businessInterests: BusinessInterest[] = isBlankMode()
+    ? [{ id: 'vierge-1' } as BusinessInterest, { id: 'vierge-2' } as BusinessInterest]
+    : data.businessInterests;
+
+  businessInterests.forEach((b) => {
     y = addRestitutionField(doc, y, 'Entreprise', [b.nom_entreprise, b.forme_juridique].filter(Boolean).join(' — '));
     y = addRestitutionField(doc, y, 'Votre rôle et vos parts', [b.role, b.parts_detenues].filter(Boolean).join(' · '));
     y = addRestitutionField(doc, y, 'Associés', b.associes);

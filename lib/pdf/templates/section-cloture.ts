@@ -7,7 +7,7 @@
  */
 
 import { PDF_THEME, formatAmount } from '../theme';
-import { addPageChrome, addPageTitle, addNarrativeBlock, addRestitutionField, addPostureNote } from '../components';
+import { addPageChrome, addPageTitle, addNarrativeBlock, addRestitutionField, addPostureNote, isBlankMode } from '../components';
 import type { CaseFileData } from '../types';
 
 type PDFDoc = any;
@@ -40,7 +40,9 @@ export function generateSummaryPage(doc: PDFDoc, data: CaseFileData, pageNumber:
   addNarrativeBlock(
     doc,
     y,
-    'Ce résumé reflète l’état du dossier à la date de génération de ce livret. Pour toute décision, le rendez-vous chez le notaire reste l’étape de référence.'
+    isBlankMode()
+      ? 'Ce résumé reflète votre situation au jour où vous l’avez complété — pensez à le dater. Pour toute décision, le rendez-vous chez le notaire reste l’étape de référence.'
+      : 'Ce résumé reflète l’état du dossier à la date de génération de ce livret. Pour toute décision, le rendez-vous chez le notaire reste l’étape de référence.'
   );
 }
 

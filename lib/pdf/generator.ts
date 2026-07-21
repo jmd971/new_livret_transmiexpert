@@ -12,6 +12,8 @@
 
 import PDFDocument from 'pdfkit';
 import { PDF_THEME } from './theme';
+import { setBlankMode } from './components';
+import { buildBlankCaseFileData } from './blank-data';
 import type { CaseFileData, ReaderProfile } from './types';
 
 import {
@@ -136,4 +138,21 @@ export async function generateUnifiedPDF(
       reject(error);
     }
   });
+}
+
+/**
+ * Édition vierge — le produit « Livret design vierge » (papier, à remplir à la main).
+ * Même document, mêmes 27 pages, mêmes thématiques : seuls les champs et tableaux sont
+ * rendus en lignes d'écriture (cf. mode vierge dans components.ts).
+ *
+ * Le drapeau est reposé dans un finally : le dessin étant entièrement synchrone dans
+ * buildDocument, aucune autre génération ne peut s'intercaler pendant qu'il est actif.
+ */
+export async function generateBlankPDF(): Promise<Buffer> {
+  setBlankMode(true);
+  try {
+    return await generateUnifiedPDF(buildBlankCaseFileData());
+  } finally {
+    setBlankMode(false);
+  }
 }

@@ -24,6 +24,47 @@ function getUsableWidth() {
   return page.width - page.margin.left - page.margin.right;
 }
 
+// --- Mode vierge (produit « Livret design vierge », édition papier à compléter à la main) ---
+// Activé par generateBlankPDF() le temps d'une génération : les primitives rendent alors des
+// lignes d'écriture manuscrite (champs et tableaux réglés vides) au lieu de la restitution des
+// données. Le rendu d'un document est entièrement synchrone (buildDocument ne cède jamais la
+// main entre setBlankMode(true) et la fin du dessin), ce drapeau de module est donc sûr même
+// si plusieurs requêtes cohabitent sur la même instance.
+let blankMode = false;
+
+export function setBlankMode(value: boolean) {
+  blankMode = value;
+}
+
+export function isBlankMode(): boolean {
+  return blankMode;
+}
+
+/**
+ * Lignes d'écriture manuscrite — uniquement pour l'édition vierge.
+ * Des filets fins régulièrement espacés, dans la même grammaire que les tableaux registre.
+ */
+export function addWritingLines(
+  doc: PDFDoc,
+  y: number,
+  count: number,
+  opts?: { width?: number; gap?: number }
+): number {
+  const width = opts?.width || getUsableWidth();
+  const gap = opts?.gap || 28;
+  let cursorY = y;
+  for (let i = 0; i < count; i++) {
+    cursorY += gap;
+    doc
+      .strokeColor(colors.BORDER)
+      .lineWidth(0.5)
+      .moveTo(page.margin.left, cursorY)
+      .lineTo(page.margin.left + width, cursorY)
+      .stroke();
+  }
+  return cursorY + spacing.md;
+}
+
 /**
  * Ossature de page : bandeau de section discret + pied de page avec pagination.
  * Remplace addTopLine + addFooter. Appelée en début de chaque nouvelle page.
@@ -165,6 +206,27 @@ export function addRestitutionField(
   opts?: { width?: number; emptyText?: string }
 ): number {
   const width = opts?.width || getUsableWidth();
+
+  // Édition vierge : libellé + espace d'écriture au-dessus du filet, sans texte d'invitation
+  // (répété sur 27 pages, « À compléter » deviendrait du bruit sur un livret papier).
+  if (blankMode) {
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text(label.toUpperCase(), page.margin.left, y, { characterSpacing: 0.5, width });
+
+    const afterY = doc.y + 24;
+    doc
+      .strokeColor(colors.BORDER)
+      .lineWidth(0.5)
+      .moveTo(page.margin.left, afterY)
+      .lineTo(page.margin.left + width, afterY)
+      .stroke();
+
+    return afterY + spacing.md;
+  }
+
   const displayValue = value && value.trim().length > 0 ? value : opts?.emptyText || 'À compléter';
   const isEmpty = !value || value.trim().length === 0;
 
@@ -215,6 +277,20 @@ export function addRestitutionGrid(
       .fillColor(colors.GREY)
       .text(field.label.toUpperCase(), x, cursorY, { characterSpacing: 0.5, width: colWidth });
 
+    // Édition vierge : espace d'écriture + filet à la place de la valeur.
+    if (blankMode) {
+      const lineY = doc.y + 22;
+      doc
+        .strokeColor(colors.BORDER)
+        .lineWidth(0.5)
+        .moveTo(x, lineY)
+        .lineTo(x + colWidth, lineY)
+        .stroke();
+      const bottomY = lineY + spacing.md;
+      if (bottomY > maxY) maxY = bottomY;
+      return;
+    }
+
     const valueY = doc.y + 2;
     const isEmpty = !field.value || field.value.trim().length === 0;
     doc
@@ -241,13 +317,17 @@ export function addLedgerTable(
   headers: string[],
   rows: string[][],
   colWidths: number[],
-  opts?: { emptyMessage?: string }
+  opts?: { emptyMessage?: string; blankRows?: number }
 ): number {
   let cursorY = y;
   const rowHeight = 26;
   const headerHeight = 22;
 
-  if (rows.length === 0) {
+  // Édition vierge : un tableau sans données devient un registre réglé à remplir à la main
+  // (en-tête conservé, lignes vides plus hautes pour l'écriture manuscrite).
+  const blankRowCount = blankMode && rows.length === 0 ? opts?.blankRows ?? 6 : 0;
+
+  if (rows.length === 0 && blankRowCount === 0) {
     doc
       .fontSize(fonts.size.body)
       .font(fonts.italic)
@@ -275,6 +355,21 @@ export function addLedgerTable(
     .lineTo(page.margin.left + colWidths.reduce((a, b) => a + b, 0), cursorY)
     .stroke();
   cursorY += spacing.xs;
+
+  if (blankRowCount > 0) {
+    const blankRowHeight = 32;
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < blankRowCount; i++) {
+      cursorY += blankRowHeight;
+      doc
+        .strokeColor(colors.BORDER)
+        .lineWidth(0.5)
+        .moveTo(page.margin.left, cursorY - spacing.xs)
+        .lineTo(page.margin.left + tableWidth, cursorY - spacing.xs)
+        .stroke();
+    }
+    return cursorY + spacing.sm;
+  }
 
   rows.forEach((row) => {
     x = page.margin.left;

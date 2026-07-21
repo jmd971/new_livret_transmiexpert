@@ -10,7 +10,7 @@
  */
 
 import { PDF_THEME, STATUS_LABELS, DOC_TYPE_LABELS, DIGITAL_ASSET_LABELS, CEREMONIE_LABELS, CHOIX_FUNERAIRE_LABELS, formatDate, formatAmount } from '../theme';
-import { addPageChrome, addPageTitle, addNarrativeBlock, addLedgerTable, addRestitutionField, addPostureNote } from '../components';
+import { addPageChrome, addPageTitle, addNarrativeBlock, addLedgerTable, addRestitutionField, addPostureNote, addWritingLines, isBlankMode } from '../components';
 import type { CaseFileData } from '../types';
 
 type PDFDoc = any;
@@ -128,12 +128,12 @@ export function generateEmergencyPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   });
 
   const fw = data.funeralWishes;
-  if (fw) {
-    y = addRestitutionField(doc, y, 'Type de cérémonie', fw.ceremonie_type ? CEREMONIE_LABELS[fw.ceremonie_type] : undefined);
-    y = addRestitutionField(doc, y, 'Choix', fw.choix ? CHOIX_FUNERAIRE_LABELS[fw.choix] : undefined);
-    y = addRestitutionField(doc, y, 'Lieu souhaité', fw.lieu);
-    y = addRestitutionField(doc, y, 'Contact pompes funèbres', fw.pompe_funebre_contact);
-    if (fw.volontes_libres) {
+  if (fw || isBlankMode()) {
+    y = addRestitutionField(doc, y, 'Type de cérémonie', fw?.ceremonie_type ? CEREMONIE_LABELS[fw.ceremonie_type] : undefined);
+    y = addRestitutionField(doc, y, 'Choix', fw?.choix ? CHOIX_FUNERAIRE_LABELS[fw.choix] : undefined);
+    y = addRestitutionField(doc, y, 'Lieu souhaité', fw?.lieu);
+    y = addRestitutionField(doc, y, 'Contact pompes funèbres', fw?.pompe_funebre_contact);
+    if (fw?.volontes_libres || isBlankMode()) {
       y += spacing.sm;
       doc
         .fontSize(fonts.size.small)
@@ -141,7 +141,7 @@ export function generateEmergencyPage(doc: PDFDoc, data: CaseFileData, pageNumbe
         .fillColor(colors.FOREST)
         .text('Volontés complémentaires', page.margin.left, y);
       y = doc.y + spacing.xs;
-      y = addNarrativeBlock(doc, y, fw.volontes_libres);
+      y = isBlankMode() ? addWritingLines(doc, y, 2) : addNarrativeBlock(doc, y, fw!.volontes_libres!);
     }
   } else {
     y = addNarrativeBlock(
@@ -163,6 +163,7 @@ export function generateEmergencyPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   const rows = data.emergencyChecklist.map((item) => [item.notes || item.task_key, STATUS_LABELS[item.status] || item.status]);
   addLedgerTable(doc, y, ['Étape', 'Statut'], rows, [305, 105], {
     emptyMessage: 'Aucune étape consignée pour le moment.',
+    blankRows: 4, // page déjà chargée en édition vierge (4 champs + volontés complémentaires)
   });
 
   addPostureNote(
