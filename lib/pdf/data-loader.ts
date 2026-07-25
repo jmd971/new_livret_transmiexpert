@@ -58,6 +58,7 @@ export async function loadCaseFileData(caseFileId: string, accessToken: string):
     { data: businessInterests },
     { data: pastDonations },
     { data: existingIndivisions },
+    { data: valuables },
   ] = await Promise.all([
     q1('identity_profile'),
     q1('family_context'),
@@ -75,6 +76,7 @@ export async function loadCaseFileData(caseFileId: string, accessToken: string):
     q('business_interests'),
     q('past_donations'),
     q('existing_indivisions'),
+    q('valuables'), // table V4.2 — si absente, Supabase renvoie une erreur et data=null → []
   ]);
 
   return {
@@ -95,5 +97,6 @@ export async function loadCaseFileData(caseFileId: string, accessToken: string):
     businessInterests: businessInterests || [],
     pastDonations: pastDonations || [],
     existingIndivisions: existingIndivisions || [],
+    valuables: valuables || [],
   };
 }

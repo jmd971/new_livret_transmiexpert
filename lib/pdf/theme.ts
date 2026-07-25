@@ -62,13 +62,19 @@ export const PDF_THEME = {
     xxxl: 48,
   },
   page: {
-    width: 595.28, // A4
-    height: 841.89,
+    // V4.2 — format LIVRE 16 × 24 cm (remplace l'A4 « dossier »).
+    // Choisi pour : lisibilité senior (corps 11 conservé), largeur d'écriture manuscrite
+    // (édition vierge) et standard des catalogues d'imprimeurs (dos carré collé).
+    // Fond perdu : à ajouter ici (+ 2×BLEED sur width/height) quand l'imprimeur aura
+    // communiqué ses spécifications — la mise en page étant relative à ces constantes,
+    // aucun template n'est à retoucher.
+    width: 453.54, // 16 cm
+    height: 680.31, // 24 cm
     margin: {
-      top: 76,
-      bottom: 84,
-      left: 74,
-      right: 60,
+      top: 58,
+      bottom: 64,
+      left: 46,
+      right: 40,
     },
   },
   // Bandeau latéral de section — reprend l'esprit du "SUIVI / RÉUNION / DOCUMENTS" existant,
@@ -157,6 +163,54 @@ export const CHOIX_FUNERAIRE_LABELS: Record<string, string> = {
   inhumation: 'Inhumation',
   cremation: 'Crémation',
   non_defini: 'Non précisé',
+};
+
+/**
+ * V4.2 — Intercalaires de section : numéro, proverbe créole, traduction, phrase d'entrée.
+ *
+ * ⚠️ À FAIRE VALIDER PAR LUC AVANT IMPRESSION : le sens, la graphie créole (elle varie
+ * entre Guadeloupe et Martinique et selon les conventions) et la pertinence culturelle
+ * de chaque proverbe. Approximatif, l'effet serait inverse de celui recherché.
+ */
+export const SECTION_DIVIDERS: Record<
+  string,
+  { roman: string; proverb: string; translation: string; intro: string }
+> = {
+  vous_et_les_votres: {
+    roman: 'I',
+    proverb: 'An sèl dwèt pa ka manjé kalalou.',
+    translation: 'Un seul doigt ne mange pas le calalou.',
+    intro:
+      'On ne traverse pas une transmission seul. Cette section pose qui vous êtes, qui sont les vôtres, et sur qui vous comptez.',
+  },
+  patrimoine: {
+    roman: 'II',
+    proverb: "Sa ki ta'w, larivyè pa ka chayé'y.",
+    translation: "Ce qui est à toi, la rivière ne l'emporte pas.",
+    intro:
+      'Ce que vous avez construit mérite mieux qu’un inventaire : une photographie fidèle, posée noir sur blanc, de ce qui devra un jour changer de mains sans se perdre en chemin.',
+  },
+  documents_securite: {
+    roman: 'III',
+    proverb: 'Sé grenn diri ka fè sak diri.',
+    translation: 'Ce sont les grains de riz qui font le sac de riz.',
+    intro:
+      'Chaque papier compte. Cette section dit ce qui existe, où le trouver, et ce qui reste à réunir — patiemment, grain après grain.',
+  },
+  decisions_methode: {
+    roman: 'IV',
+    proverb: 'Piti a piti, zwazo ka fè nich a-y.',
+    translation: 'Petit à petit, l’oiseau fait son nid.',
+    intro:
+      'Une décision à la fois, datée, suivie. Cette section est votre outil de travail : objectifs, réunions, plan d’action.',
+  },
+  cloture: {
+    roman: 'V',
+    proverb: 'Mon rôle n’est pas de décider pour vous, mais de vous aider à voir clairement.',
+    translation: 'Luc Silvestre, TransmiExpert',
+    intro:
+      'Les pages qui referment ce livre sont celles qu’on partage : le résumé pour le notaire, les gestes des premiers jours, et un mot pour les vôtres.',
+  },
 };
 
 // --- Libellés V4.1 — patrimoine étendu ---

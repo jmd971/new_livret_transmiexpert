@@ -38,26 +38,26 @@ export function generateCoverPage(doc: PDFDoc, data: CaseFileData) {
     .fontSize(fonts.size.small)
     .font(fonts.body)
     .fillColor(colors.GREY)
-    .text('TRANSMIEXPERT', 0, 90, { width: page.width, align: 'center', characterSpacing: 2 });
+    .text('TRANSMIEXPERT', 0, page.height * 0.13, { width: page.width, align: 'center', characterSpacing: 2 });
 
   doc
     .strokeColor(colors.GOLD)
     .lineWidth(1)
-    .moveTo(centerX - 40, 118)
-    .lineTo(centerX + 40, 118)
+    .moveTo(centerX - 40, page.height * 0.13 + 26)
+    .lineTo(centerX + 40, page.height * 0.13 + 26)
     .stroke();
 
   doc
     .fontSize(fonts.size.huge)
     .font(fonts.heading)
     .fillColor(colors.INK)
-    .text('Livret de Succession', 0, 300, { width: page.width, align: 'center' });
+    .text('Livret de Succession', 0, page.height * 0.4, { width: page.width, align: 'center' });
 
   doc
     .fontSize(fonts.size.large)
     .font(fonts.italic)
     .fillColor(colors.FOREST)
-    .text(isBlankMode() ? 'Pack Sérénité · Édition papier' : 'Pack Sérénité · Dossier personnel', 0, 360, {
+    .text(isBlankMode() ? 'Pack Sérénité · Édition papier' : 'Pack Sérénité · Dossier personnel', 0, page.height * 0.475, {
       width: page.width,
       align: 'center',
     });
@@ -68,19 +68,19 @@ export function generateCoverPage(doc: PDFDoc, data: CaseFileData) {
       .fontSize(fonts.size.tiny)
       .font(fonts.body)
       .fillColor(colors.GREY)
-      .text('CE LIVRET APPARTIENT À', 0, 432, { width: page.width, align: 'center', characterSpacing: 1 });
+      .text('CE LIVRET APPARTIENT À', 0, page.height * 0.60, { width: page.width, align: 'center', characterSpacing: 1 });
     doc
       .strokeColor(colors.BORDER)
       .lineWidth(0.5)
-      .moveTo(centerX - 110, 476)
-      .lineTo(centerX + 110, 476)
+      .moveTo(centerX - 110, page.height * 0.60 + 42)
+      .lineTo(centerX + 110, page.height * 0.60 + 42)
       .stroke();
   } else if (ownerName) {
     doc
       .fontSize(fonts.size.medium)
       .font(fonts.body)
       .fillColor(colors.INK)
-      .text(`Préparé pour ${ownerName}`, 0, 440, { width: page.width, align: 'center' });
+      .text(`Préparé pour ${ownerName}`, 0, page.height * 0.61, { width: page.width, align: 'center' });
   }
 
   if (!isBlankMode()) {
@@ -175,7 +175,9 @@ export function generateWelcomePage(
 
 export function generateDashboardPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
   doc.addPage();
-  addPageChrome(doc, { section: 'ouverture', pageNumber });
+  // V4.2 : la page vit désormais dans la section Clôture (on ouvre un livre sur l'élan,
+  // pas sur une note) — le chrome suit.
+  addPageChrome(doc, { section: 'cloture', pageNumber });
 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre situation en un regard',
@@ -284,4 +286,139 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     page.height - page.margin.bottom - 20,
     'TransmiExpert · Médiation, organisation et coordination patrimoniale — hors conseil juridique réglementé.'
   );
+}
+
+
+/**
+ * NOUVELLE PAGE V4.2 — page de garde « Ce livret appartient à ».
+ * La première chose qu'on lit en ouvrant le livre : l'objet devient personnel,
+ * et celui qui le trouve un jour sait quoi en faire.
+ */
+export function generateBelongsPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  doc.rect(0, 0, page.width, page.height).fill(colors.IVORY);
+  doc.rect(0, 0, PDF_THEME.sectionBand.width, page.height).fill(colors.FOREST);
+
+  const centerX = page.width / 2;
+  const ownerName = data.identity
+    ? [data.identity.prenoms, data.identity.nom_usage || data.identity.nom_naissance].filter(Boolean).join(' ')
+    : undefined;
+
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text('CE LIVRET APPARTIENT À', 0, page.height * 0.22, {
+      width: page.width,
+      align: 'center',
+      characterSpacing: 1.5,
+    });
+
+  if (!isBlankMode() && ownerName) {
+    doc
+      .fontSize(fonts.size.xlarge)
+      .font(fonts.headingItalic)
+      .fillColor(colors.INK)
+      .text(ownerName, 0, page.height * 0.22 + 34, { width: page.width, align: 'center' });
+  } else {
+    doc
+      .strokeColor(colors.BORDER)
+      .lineWidth(0.5)
+      .moveTo(centerX - 120, page.height * 0.22 + 64)
+      .lineTo(centerX + 120, page.height * 0.22 + 64)
+      .stroke();
+  }
+
+  const bodyY = page.height * 0.40;
+  doc
+    .fontSize(fonts.size.body)
+    .font(fonts.body)
+    .fillColor(colors.INK)
+    .text(
+      isBlankMode()
+        ? 'Ce livret rassemble ce que son propriétaire choisit d’y confier. S’il vous est remis un jour, c’est qu’il vous fait confiance pour en faire bon usage : prenez le temps de le lire — tout ce qui compte y est organisé.'
+        : 'Il a été préparé avec elle ou lui, à partir de ce qui a été choisi d’y être confié. Si ce livret vous est remis un jour, c’est qu’on vous fait confiance pour en faire bon usage : prenez le temps de le lire — tout ce qui compte y est déjà organisé.',
+      page.margin.left + 16,
+      bodyY,
+      { width: page.width - page.margin.left - page.margin.right - 32, align: 'center', lineGap: 3 }
+    );
+
+  doc
+    .strokeColor(colors.BORDER)
+    .lineWidth(0.5)
+    .moveTo(centerX - 100, page.height * 0.62)
+    .lineTo(centerX + 100, page.height * 0.62)
+    .stroke();
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.italic)
+    .fillColor(colors.GREY)
+    .text('Signature — pour faire de ce livret le vôtre, à l’encre.', 0, page.height * 0.62 + 8, {
+      width: page.width,
+      align: 'center',
+    });
+
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text(String(pageNumber).padStart(2, '0'), 0, page.height - 42, { width: page.width, align: 'center' });
+}
+
+/**
+ * NOUVELLE PAGE V4.2 — sommaire. Pagination FIXE par construction (44 pages) :
+ * si l'ordre des pages change dans generator.ts, mettre ce sommaire à jour.
+ */
+export function generateTOCPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'ouverture', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, { kicker: 'Pour vous repérer', title: 'Sommaire' });
+
+  const entries: Array<[string, string, boolean]> = [
+    ['Le mot de Luc', '04', false],
+    ['Le cadre de notre accompagnement', '05', false],
+    ['I · Vous et les vôtres', '06', true],
+    ['Votre profil · votre famille · vos contacts', '07', false],
+    ['Personnes de confiance · prévoir l’imprévu', '10', false],
+    ['II · Votre patrimoine', '12', true],
+    ['Biens · comptes et contrats · dettes et créances', '14', false],
+    ['Entreprise · donations · objets et souvenirs', '17', false],
+    ['Indivisions en cours · repères Letchimy et fonciers', '20', false],
+    ['III · Documents & sécurité', '23', true],
+    ['Vos documents · pièces à réunir', '24', false],
+    ['Vie numérique · volontés et urgence', '26', false],
+    ['IV · Décisions & méthode', '28', true],
+    ['Objectifs · décisions en cours', '29', false],
+    ['Réunion familiale · la famille à distance', '31', false],
+    ['Compte-rendu · plan d’action · notes', '33', false],
+    ['V · Clôture', '36', true],
+    ['Où en est votre dossier · un mot pour les vôtres', '37', false],
+    ['Résumé à partager · les dix premiers jours', '39', false],
+    ['Où s’adresser · un livre vivant', '41', false],
+  ];
+
+  const width = page.width - page.margin.left - page.margin.right;
+  entries.forEach(([label, num, isSection]) => {
+    const rowY = y;
+    doc
+      .fontSize(isSection ? fonts.size.medium : fonts.size.body)
+      .font(isSection ? fonts.heading : fonts.body)
+      .fillColor(isSection ? colors.FOREST : colors.INK)
+      .text(label, page.margin.left, rowY, { width: width - 40 });
+    doc
+      .fontSize(isSection ? fonts.size.medium : fonts.size.body)
+      .font(isSection ? fonts.heading : fonts.body)
+      .fillColor(isSection ? colors.GOLD : colors.GREY)
+      .text(num, page.margin.left, rowY, { width, align: 'right' });
+    y = doc.y + (isSection ? spacing.md : spacing.sm);
+    if (isSection) {
+      doc
+        .strokeColor(colors.BORDER)
+        .lineWidth(0.5)
+        .moveTo(page.margin.left, y - 4)
+        .lineTo(page.margin.left + width, y - 4)
+        .stroke();
+    }
+  });
 }

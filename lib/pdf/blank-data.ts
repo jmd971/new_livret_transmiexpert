@@ -33,5 +33,6 @@ export function buildBlankCaseFileData(): CaseFileData {
     businessInterests: [],
     pastDonations: [],
     existingIndivisions: [],
+    valuables: [],
   };
 }

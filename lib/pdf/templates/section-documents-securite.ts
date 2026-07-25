@@ -33,7 +33,7 @@ export function generateDocumentsIndexPage(doc: PDFDoc, data: CaseFileData, page
     d.expiry_date ? formatDate(d.expiry_date) : '—',
   ]);
 
-  y = addLedgerTable(doc, y, ['Document', 'Statut', 'Où le trouver', 'Échéance'], rows, [140, 90, 140, 105], {
+  y = addLedgerTable(doc, y, ['Document', 'Statut', 'Où le trouver', 'Échéance'], rows, [100, 70, 110, 85], {
     emptyMessage: 'Aucun document indexé pour le moment.',
   });
 
@@ -51,7 +51,7 @@ export function generateDocumentsIndexPage(doc: PDFDoc, data: CaseFileData, page
     l.depose_chez || '—',
     l.date_document ? formatDate(l.date_document) : '—',
   ]);
-  addLedgerTable(doc, y, ['Type', 'Statut', 'Déposé chez', 'Date'], legalRows, [130, 90, 145, 110], {
+  addLedgerTable(doc, y, ['Type', 'Statut', 'Déposé chez', 'Date'], legalRows, [95, 70, 105, 95], {
     emptyMessage: 'Aucune disposition légale renseignée pour le moment.',
   });
 }
@@ -69,7 +69,7 @@ export function generateMissingDocumentsPage(doc: PDFDoc, data: CaseFileData, pa
   const missing = data.documents.filter((d) => d.status === 'manquant' || d.status === 'a_verifier');
   const rows = missing.map((d) => [DOC_TYPE_LABELS[d.doc_type] || d.doc_type, STATUS_LABELS[d.status] || d.status, d.note || '—']);
 
-  addLedgerTable(doc, y, ['Document', 'Statut', 'Notes'], rows, [160, 100, 215], {
+  addLedgerTable(doc, y, ['Document', 'Statut', 'Notes'], rows, [115, 80, 170], {
     emptyMessage: 'Tous vos documents indexés sont à jour — rien à relancer pour le moment.',
   });
 }
@@ -101,7 +101,7 @@ export function generateDigitalLifePage(doc: PDFDoc, data: CaseFileData, pageNum
     a.valeur_estimee ? formatAmount(a.valeur_estimee) : '—',
   ]);
 
-  addLedgerTable(doc, y + spacing.sm, ['Type', 'Fournisseur', 'Où trouver l’accès', 'Valeur estimée'], rows, [90, 130, 160, 95], {
+  addLedgerTable(doc, y + spacing.sm, ['Type', 'Fournisseur', 'Où trouver l’accès', 'Valeur estimée'], rows, [70, 95, 125, 75], {
     emptyMessage: 'Aucun actif numérique renseigné pour le moment.',
   });
 
@@ -161,7 +161,7 @@ export function generateEmergencyPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   y = doc.y + spacing.sm;
 
   const rows = data.emergencyChecklist.map((item) => [item.notes || item.task_key, STATUS_LABELS[item.status] || item.status]);
-  addLedgerTable(doc, y, ['Étape', 'Statut'], rows, [305, 105], {
+  addLedgerTable(doc, y, ['Étape', 'Statut'], rows, [275, 90], {
     emptyMessage: 'Aucune étape consignée pour le moment.',
     blankRows: 4, // page déjà chargée en édition vierge (4 champs + volontés complémentaires)
   });

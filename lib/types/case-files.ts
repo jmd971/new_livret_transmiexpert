@@ -26,6 +26,10 @@ export interface CaseFile {
   title: string;
   status: CaseFileStatus;
   completion_score: number;
+  // V4.2 — champs éditoriaux optionnels (migration à part ; absents = pages « à compléter »)
+  histoire_familiale?: string;
+  mot_aux_proches?: string;
+  territoire?: 'guadeloupe' | 'martinique';
   created_at: string;
   updated_at: string;
 }
@@ -112,9 +116,12 @@ export interface Property {
   note?: string;
 }
 
+export type DebtSens = 'je_dois' | 'on_me_doit';
+
 export interface Debt {
   id: string;
   case_file_id: string;
+  sens?: DebtSens;
   creditor: string;
   amount_estimate?: number;
   note?: string;
@@ -220,6 +227,18 @@ export interface ExistingIndivision {
   co_indivisaires?: string;
   situation: IndivisionSituation;
   notaire_contact?: string;
+  note?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// V4.2 — objets de valeur et souvenirs
+export interface Valuable {
+  id: string;
+  case_file_id: string;
+  objet: string;
+  histoire?: string;
+  destinataire?: string;
   note?: string;
   created_at: string;
   updated_at: string;

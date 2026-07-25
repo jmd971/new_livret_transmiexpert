@@ -12,6 +12,7 @@ import {
   addPageTitle,
   addNarrativeBlock,
   addRestitutionGrid,
+  addRestitutionField,
   addLedgerTable,
   addPostureNote,
   addWritingLines,
@@ -80,11 +81,36 @@ export function generateFamilyPage(doc: PDFDoc, data: CaseFileData, pageNumber: 
     );
     y = addWritingLines(doc, y, 4);
   } else {
+    // V4.2 — prose interprétée : la donnée devient une phrase (gabarits conditionnels,
+    // aucune IA : ton maîtrisé, coût nul, rendu déterministe).
+    const fc = data.familyContext;
+    const parts: string[] = [];
+    if (fc?.statut_conjugal) {
+      const statut = (STATUT_CONJUGAL_LABELS[fc.statut_conjugal] || fc.statut_conjugal).toLowerCase();
+      const regime =
+        fc.statut_conjugal === 'marie'
+          ? fc.contrat_mariage_existe
+            ? ', avec un contrat de mariage'
+            : ', sans contrat de mariage — le régime de la communauté s’applique donc par défaut'
+          : '';
+      parts.push(`Vous êtes ${statut}${regime}.`);
+    }
+    if (fc?.enfants_mineurs) {
+      parts.push(
+        'Vous avez des enfants encore mineurs : c’est une donnée qui comptera dans chaque décision, et que ce livret garde en première ligne.'
+      );
+    }
+    if (parts.length > 0) {
+      y = addNarrativeBlock(doc, y, parts.join(' '));
+      y += spacing.xs;
+    }
+
     y = addNarrativeBlock(
       doc,
       y,
-      data.familyContext?.notes ||
-        "Les notes sur votre situation familiale apparaîtront ici une fois renseignées dans votre espace personnel."
+      data.caseFile?.histoire_familiale ||
+        fc?.notes ||
+        'Votre histoire familiale apparaîtra ici une fois racontée dans votre espace personnel — quelques lignes suffisent : qui compose votre famille, ce qui la lie, ce qu’il faut savoir pour la comprendre.'
     );
   }
 
@@ -124,7 +150,7 @@ export function generateContactsPage(doc: PDFDoc, data: CaseFileData, pageNumber
   });
 
   const rows = data.keyContacts.map((c) => [c.role, c.nom, c.tel || '—', c.email || '—']);
-  addLedgerTable(doc, y, ['Rôle', 'Nom', 'Téléphone', 'Email'], rows, [90, 150, 110, 165], {
+  addLedgerTable(doc, y, ['Rôle', 'Nom', 'Téléphone', 'Email'], rows, [65, 110, 85, 105], {
     emptyMessage: 'Aucun contact clé renseigné pour le moment.',
   });
 }
@@ -158,7 +184,7 @@ export function generateTrustPeoplePage(doc: PDFDoc, data: CaseFileData, pageNum
     [p.phone, p.email].filter(Boolean).join(' · ') || '—',
   ]);
 
-  addLedgerTable(doc, y + spacing.sm, ['Nom', 'Lien', 'Ce qui leur revient', 'Contact'], rows, [110, 90, 140, 175], {
+  addLedgerTable(doc, y + spacing.sm, ['Nom', 'Lien', 'Ce qui leur revient', 'Contact'], rows, [80, 60, 110, 115], {
     emptyMessage:
       'Aucune personne de confiance désignée pour le moment. Vous pourrez en ajouter depuis votre espace personnel, à votre rythme.',
   });
@@ -167,5 +193,54 @@ export function generateTrustPeoplePage(doc: PDFDoc, data: CaseFileData, pageNum
     doc,
     page.height - page.margin.bottom - 20,
     "Cette page organise vos souhaits ; elle ne se substitue pas à une clause bénéficiaire ou à une disposition testamentaire, qui relèvent d'un professionnel du droit."
+  );
+}
+
+
+/**
+ * NOUVELLE PAGE V4.2 — « Prévoir l'imprévu » : l'incapacité arrive statistiquement
+ * avant la succession. Restitue legal_documents_status pour le mandat de protection
+ * future et les directives anticipées — aucun champ nouveau en base.
+ */
+export function generateIncapacityPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'vous_et_les_votres', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Vous et les vôtres',
+    title: 'Prévoir l’imprévu',
+    mission: 'Parce que l’incapacité arrive parfois avant la succession.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'On prépare sa succession ; on oublie souvent de préparer l’avant. Une hospitalisation, une perte d’autonomie — et ce sont les vôtres qui devraient décider sans savoir ce que vous auriez voulu. Trois dispositifs changent tout : le mandat de protection future, les directives anticipées, la personne de confiance médicale.'
+  );
+  y += spacing.sm;
+
+  const find = (t: string) => data.legalDocuments.find((l) => l.doc_type === t);
+  const statusOf = (t: string) => {
+    const docStatus = find(t);
+    if (!docStatus) return undefined;
+    return docStatus.existe
+      ? ['Établi', docStatus.depose_chez ? `déposé chez ${docStatus.depose_chez}` : ''].filter(Boolean).join(' — ')
+      : 'À établir';
+  };
+
+  y = addRestitutionField(doc, y, 'Mandat de protection future', statusOf('mandat_protection'), {
+    emptyText: 'Non renseigné — à envisager, sans urgence mais sans oubli',
+  });
+  y = addRestitutionField(doc, y, 'Directives anticipées', statusOf('directives_anticipees'), {
+    emptyText: 'Non renseignées — quelques lignes suffisent, votre médecin peut vous guider',
+  });
+  y = addRestitutionField(doc, y, 'Personne de confiance médicale', undefined, {
+    emptyText: 'À désigner auprès de votre médecin — souvent l’une des personnes de la page précédente',
+  });
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Le mandat de protection future et les directives anticipées sont des actes encadrés par la loi : leur rédaction se fait avec un professionnel du droit ou de la santé. Cette page organise vos intentions — elle ne les remplace pas.'
   );
 }
