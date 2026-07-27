@@ -358,6 +358,48 @@ export function generateBelongsPage(doc: PDFDoc, data: CaseFileData, pageNumber:
       align: 'center',
     });
 
+  // Épigraphe demandée par Luc (27/07/2026) : citation créole de Luc-Hubert Séjor sur la
+  // dynamique des conflits au moment du partage. Graphie transmise par Luc — variantes
+  // notées : « Sélé ni bien à séparer, ké nou ka sav kimoun ki kimoun. » /
+  // « Tant que o poko sépare bien, o poko sav kimoun ki bien, bien, bien. »
+  // La graphie FINALE reste à confirmer avec Luc avant impression.
+  const epigraphY = page.height * 0.74;
+  doc
+    .fontSize(fonts.size.medium)
+    .font(fonts.italic)
+    .fillColor(colors.FOREST)
+    .text('« Sélé ki ni bien à séparer, ké nou ka sav kimoun ki bien. »', page.margin.left, epigraphY, {
+      width: page.width - page.margin.left - page.margin.right,
+      align: 'center',
+      lineGap: 3,
+    });
+  doc
+    .fontSize(fonts.size.small)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text('C’est quand il y a des biens à partager qu’on découvre qui est qui.', page.margin.left, doc.y + 6, {
+      width: page.width - page.margin.left - page.margin.right,
+      align: 'center',
+    });
+  doc
+    .fontSize(fonts.size.small)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text('— Luc-Hubert Séjor', page.margin.left, doc.y + 4, {
+      width: page.width - page.margin.left - page.margin.right,
+      align: 'center',
+    });
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.italic)
+    .fillColor(colors.GREY)
+    .text(
+      'Ce livret existe pour déjouer ce proverbe : que le moment venu, les vôtres n’aient rien à découvrir — seulement à se souvenir.',
+      page.margin.left + 20,
+      doc.y + 10,
+      { width: page.width - page.margin.left - page.margin.right - 40, align: 'center', lineGap: 2 }
+    );
+
   doc
     .fontSize(fonts.size.tiny)
     .font(fonts.body)

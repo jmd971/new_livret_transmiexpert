@@ -342,22 +342,23 @@ export function generateIndivisionGlossaryPage(doc: PDFDoc, data: CaseFileData, 
     mission: 'Pour comprendre les termes que vous entendrez chez le notaire — sans jargon.',
   });
 
+  // Définitions précisées par Luc Silvestre (27/07/2026) — vocabulaire exact du notariat.
   const entries: Array<[string, string]> = [
     [
       'Indivision',
-      'Situation où un bien appartient à plusieurs héritiers en même temps, sans qu’il soit encore partagé entre eux.',
+      'Situation où plusieurs héritiers — les co-indivisaires — exercent un droit de propriété sur un même bien, sans savoir sur quelle partie du bien portent leurs droits. Chacun détient une quote-part : une part du tout, pas un morceau précis.',
     ],
     [
-      'Loi Letchimy',
-      "Texte qui facilite, en Guadeloupe et dans les autres territoires d'outre-mer concernés, la vente ou le partage d'un bien en indivision ouverte depuis plus de dix ans, sans exiger l'accord de tous les héritiers.",
-    ],
-    [
-      'Sortie d’indivision',
-      'Le moment où le bien est finalement partagé, vendu ou attribué à l’un des héritiers — mettant fin à la copropriété entre tous.',
+      'Sortir de l’indivision',
+      'Trois voies y mènent : le partage entre tous les héritiers ; la vente à un héritier (la licitation) ; ou l’attribution du bien à un héritier, qui verse aux autres une compensation appelée soulte. Le but est le même : mettre fin à l’indivision successorale.',
     ],
     [
       'Acte de notoriété',
-      'Document établi par le notaire qui identifie officiellement les héritiers d’une personne décédée.',
+      'Document notarié qui liste officiellement tous les héritiers du défunt (le « de cujus », comme l’écrivent les notaires). C’est lui qui dit qui hérite.',
+    ],
+    [
+      'Loi Letchimy (2018, modifiée en 2024)',
+      'Texte voté pour lutter contre les indivisions qui immobilisent le foncier en Guadeloupe et dans les autres outre-mer. Si la succession est ouverte depuis plus de dix ans, la majorité absolue des co-indivisaires suffit pour décider la vente ou le partage — l’unanimité n’est plus requise. La réforme de 2024 proroge le dispositif jusqu’en 2028.',
     ],
   ];
 
@@ -437,7 +438,7 @@ export function generateLandTenurePage(doc: PDFDoc, data: CaseFileData, pageNumb
     ],
     [
       'La prescription acquisitive',
-      'Le mécanisme qui permet, sous conditions strictes, de faire reconnaître la propriété d’un bien occupé paisiblement et durablement — en général trente ans. C’est souvent la voie de régularisation des terrains sans titre.',
+      'Le mécanisme qui permet, sous conditions strictes, de faire reconnaître la propriété d’un bien occupé paisiblement et durablement — trente ans en droit commun, un délai ramené à dix ans dans les outre-mer par la réforme de 2024 de la loi Letchimy. C’est souvent la voie de régularisation des terrains sans titre.',
     ],
     [
       'La zone des cinquante pas géométriques',
