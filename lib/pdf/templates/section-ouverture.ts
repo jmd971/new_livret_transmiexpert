@@ -57,7 +57,7 @@ export function generateCoverPage(doc: PDFDoc, data: CaseFileData) {
     .fontSize(fonts.size.large)
     .font(fonts.italic)
     .fillColor(colors.FOREST)
-    .text(isBlankMode() ? 'Pack Sérénité · Édition papier' : 'Pack Sérénité · Dossier personnel', 0, page.height * 0.475, {
+    .text(isBlankMode() ? 'Pack Sérénité, édition papier' : 'Pack Sérénité, dossier personnel', 0, page.height * 0.475, {
       width: page.width,
       align: 'center',
     });
@@ -124,13 +124,13 @@ export function generateWelcomePage(
 
   const openingByProfile: Record<ReaderProfile, string> = {
     crise:
-      "Vous traversez une période où beaucoup de choses demandent à être clarifiées en même temps. Ce livret ne va pas tout résoudre d'un coup — mais il rassemble, page après page, ce qui est déjà su, pour que vous n'ayez plus à le porter seul dans votre tête. Commencez par les pages qui vous concernent le plus aujourd'hui : le reste attendra.",
+      "Vous traversez une période où beaucoup de choses demandent à être clarifiées en même temps. Ce livret ne va pas tout résoudre d'un coup, mais il rassemble, page après page, ce qui est déjà su, pour que vous n'ayez plus à le porter seul dans votre tête. Commencez par les pages qui vous concernent le plus aujourd'hui : le reste attendra.",
     anticipateur:
-      "Vous avez fait le choix, rare et précieux, de vous en occuper avant que la situation ne l'impose. Ce livret rassemble ce que vous nous avez confié — votre famille, votre patrimoine, vos volontés — dans un seul document que vous pourrez enrichir, partager ou simplement garder à portée de main.",
+      "Vous avez fait le choix, rare et précieux, de vous en occuper avant que la situation ne l'impose. Ce livret rassemble ce que vous nous avez confié : votre famille, votre patrimoine, vos volontés. Un seul document, que vous pourrez enrichir, partager ou simplement garder à portée de main.",
   };
 
   const blankOpening =
-    "Ce livret est le vôtre. Page après page, il vous invite à consigner ce qui compte — votre famille, votre patrimoine, vos volontés — dans un seul document que vous pourrez enrichir à votre rythme, partager ou simplement garder à portée de main.";
+    "Ce livret est le vôtre. Page après page, il vous invite à consigner ce qui compte : votre famille, votre patrimoine, vos volontés. Un seul document, que vous enrichissez à votre rythme, à partager ou simplement garder à portée de main.";
 
   y = addNarrativeBlock(doc, y, isBlankMode() ? blankOpening : openingByProfile[readerProfile]);
   y += spacing.md;
@@ -138,7 +138,7 @@ export function generateWelcomePage(
   y = addPullQuote(
     doc,
     y,
-    "Mon rôle n'est pas de décider pour vous, mais de vous aider à voir clairement — et à avancer, à votre rythme.",
+    "Mon rôle n'est pas de décider pour vous, mais de vous aider à voir clairement, et à avancer à votre rythme.",
     'Luc Silvestre, TransmiExpert'
   );
 
@@ -159,7 +159,7 @@ export function generateWelcomePage(
       ]
     : [
         'Chaque section restitue ce que vous avez déjà renseigné dans votre espace personnel.',
-        "Les mentions « à compléter » ne sont jamais un jugement — c'est une invitation à revenir enrichir votre dossier quand vous le souhaitez.",
+        "Les mentions « à compléter » ne sont jamais un jugement, mais une invitation à revenir enrichir votre dossier quand vous le souhaitez.",
         'La dernière page rassemble un résumé à partager, si vous le souhaitez, avec un proche ou un notaire.',
       ];
   bullets.forEach((b) => {
@@ -183,8 +183,8 @@ export function generateDashboardPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     kicker: 'Votre situation en un regard',
     title: isBlankMode() ? 'Votre livret, à votre rythme' : 'Où en est votre dossier',
     mission: isBlankMode()
-      ? 'Quelques repères à tenir à jour — pour vous, et pour ceux qui ouvriront ce livret un jour.'
-      : 'Un repère, pas une note — pour savoir ce qui est déjà solide et ce qui peut encore être enrichi.',
+      ? 'Quelques repères à tenir à jour, pour vous et pour ceux qui ouvriront ce livret un jour.'
+      : 'Un repère, pas une note : pour savoir ce qui est déjà solide et ce qui peut encore être enrichi.',
   });
 
   if (isBlankMode()) {
@@ -236,7 +236,7 @@ export function generateDashboardPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     y = addNarrativeBlock(
       doc,
       y,
-      "Ce livret évolue avec vous. Chaque information ajoutée dans votre espace personnel enrichira la prochaine version — sans que vous ayez à tout ressaisir."
+      "Ce livret évolue avec vous. Chaque information ajoutée dans votre espace personnel enrichira la prochaine version, sans que vous ayez à tout ressaisir."
     );
   }
 }
@@ -248,7 +248,7 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Le cadre de notre accompagnement',
-    title: 'Ce que ce livret est — et ce qu’il n’est pas',
+    title: 'Ce que ce livret est, et ce qu’il n’est pas',
   });
 
   y = addNarrativeBlock(
@@ -264,7 +264,7 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   y = addNarrativeBlock(
     doc,
     y,
-    "TransmiExpert n'est ni notaire, ni avocat, ni expert-comptable. Notre rôle est celui d'un tiers neutre : nous facilitons le dialogue, organisons l'information et préparons le terrain — les actes et le conseil juridique restent, à chaque étape, l'affaire des professionnels du droit."
+    "TransmiExpert n'est ni notaire, ni avocat, ni expert-comptable. Notre rôle est celui d'un tiers neutre : nous facilitons le dialogue, organisons l'information et préparons le terrain. Les actes et le conseil juridique restent, à chaque étape, l'affaire des professionnels du droit."
   );
 
   y += spacing.xl;
@@ -284,7 +284,7 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   addPostureNote(
     doc,
     page.height - page.margin.bottom - 20,
-    'TransmiExpert · Médiation, organisation et coordination patrimoniale — hors conseil juridique réglementé.'
+    'TransmiExpert : médiation, organisation et coordination patrimoniale, hors conseil juridique réglementé.'
   );
 }
 
@@ -336,8 +336,8 @@ export function generateBelongsPage(doc: PDFDoc, data: CaseFileData, pageNumber:
     .fillColor(colors.INK)
     .text(
       isBlankMode()
-        ? 'Ce livret rassemble ce que son propriétaire choisit d’y confier. S’il vous est remis un jour, c’est qu’il vous fait confiance pour en faire bon usage : prenez le temps de le lire — tout ce qui compte y est organisé.'
-        : 'Il a été préparé avec elle ou lui, à partir de ce qui a été choisi d’y être confié. Si ce livret vous est remis un jour, c’est qu’on vous fait confiance pour en faire bon usage : prenez le temps de le lire — tout ce qui compte y est déjà organisé.',
+        ? 'Ce livret rassemble ce que son propriétaire choisit d’y confier. S’il vous est remis un jour, c’est qu’il vous fait confiance pour en faire bon usage : prenez le temps de le lire : tout ce qui compte y est organisé.'
+        : 'Il a été préparé avec elle ou lui, à partir de ce qui a été choisi d’y être confié. Si ce livret vous est remis un jour, c’est qu’on vous fait confiance pour en faire bon usage : prenez le temps de le lire : tout ce qui compte y est déjà organisé.',
       page.margin.left + 16,
       bodyY,
       { width: page.width - page.margin.left - page.margin.right - 32, align: 'center', lineGap: 3 }
@@ -353,7 +353,7 @@ export function generateBelongsPage(doc: PDFDoc, data: CaseFileData, pageNumber:
     .fontSize(fonts.size.tiny)
     .font(fonts.italic)
     .fillColor(colors.GREY)
-    .text('Signature — pour faire de ce livret le vôtre, à l’encre.', 0, page.height * 0.62 + 8, {
+    .text('Signature : pour faire de ce livret le vôtre, à l’encre.', 0, page.height * 0.62 + 8, {
       width: page.width,
       align: 'center',
     });
@@ -394,7 +394,7 @@ export function generateBelongsPage(doc: PDFDoc, data: CaseFileData, pageNumber:
     .font(fonts.italic)
     .fillColor(colors.GREY)
     .text(
-      'Ce livret existe pour déjouer ce proverbe : que le moment venu, les vôtres n’aient rien à découvrir — seulement à se souvenir.',
+      'Ce livret existe pour déjouer ce proverbe : que le moment venu, les vôtres n’aient rien à découvrir, seulement à se souvenir.',
       page.margin.left + 20,
       doc.y + 10,
       { width: page.width - page.margin.left - page.margin.right - 40, align: 'center', lineGap: 2 }
@@ -420,24 +420,24 @@ export function generateTOCPage(doc: PDFDoc, data: CaseFileData, pageNumber: num
   const entries: Array<[string, string, boolean]> = [
     ['Le mot de Luc', '04', false],
     ['Le cadre de notre accompagnement', '05', false],
-    ['I · Vous et les vôtres', '06', true],
-    ['Votre profil · votre famille · vos contacts', '07', false],
-    ['Personnes de confiance · prévoir l’imprévu', '10', false],
-    ['II · Votre patrimoine', '12', true],
-    ['Biens · comptes et contrats · dettes et créances', '14', false],
-    ['Entreprise · donations · objets et souvenirs', '17', false],
-    ['Indivisions en cours · repères Letchimy et fonciers', '20', false],
-    ['III · Documents & sécurité', '23', true],
-    ['Vos documents · pièces à réunir', '24', false],
-    ['Vie numérique · volontés et urgence', '26', false],
-    ['IV · Décisions & méthode', '28', true],
-    ['Objectifs · décisions en cours', '29', false],
-    ['Réunion familiale · la famille à distance', '31', false],
-    ['Compte-rendu · plan d’action · notes', '33', false],
-    ['V · Clôture', '36', true],
-    ['Où en est votre dossier · un mot pour les vôtres', '37', false],
-    ['Résumé à partager · les dix premiers jours', '39', false],
-    ['Où s’adresser · un livre vivant', '41', false],
+    ['I. Vous et les vôtres', '06', true],
+    ['Votre profil, votre famille, vos contacts', '07', false],
+    ['Personnes de confiance, prévoir l’imprévu', '10', false],
+    ['II. Votre patrimoine', '12', true],
+    ['Biens, comptes et contrats, dettes et créances', '14', false],
+    ['Entreprise, donations, objets et souvenirs', '17', false],
+    ['Indivisions en cours, repères Letchimy et fonciers', '20', false],
+    ['III. Documents & sécurité', '23', true],
+    ['Vos documents, pièces à réunir', '24', false],
+    ['Vie numérique, volontés et urgence', '26', false],
+    ['IV. Décisions & méthode', '28', true],
+    ['Objectifs, décisions en cours', '29', false],
+    ['Réunion familiale, la famille à distance', '31', false],
+    ['Compte-rendu, plan d’action, notes', '33', false],
+    ['V. Clôture', '36', true],
+    ['Où en est votre dossier, un mot pour les vôtres', '37', false],
+    ['Résumé à partager, les dix premiers jours', '39', false],
+    ['Où s’adresser, un livre vivant', '41', false],
   ];
 
   const width = page.width - page.margin.left - page.margin.right;

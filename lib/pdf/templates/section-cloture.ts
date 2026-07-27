@@ -49,7 +49,7 @@ export function generateSummaryPage(doc: PDFDoc, data: CaseFileData, pageNumber:
     doc,
     y,
     isBlankMode()
-      ? 'Ce résumé reflète votre situation au jour où vous l’avez complété — pensez à le dater. Pour toute décision, le rendez-vous chez le notaire reste l’étape de référence.'
+      ? 'Ce résumé reflète votre situation au jour où vous l’avez complété. Pensez à le dater. Pour toute décision, le rendez-vous chez le notaire reste l’étape de référence.'
       : 'Ce résumé reflète l’état du dossier à la date de génération de ce livret. Pour toute décision, le rendez-vous chez le notaire reste l’étape de référence.'
   );
 }
@@ -102,7 +102,7 @@ export function generateClosingPage(doc: PDFDoc, data: CaseFileData, pageNumber:
   addPostureNote(
     doc,
     page.height - page.margin.bottom - 10,
-    'TransmiExpert · Les Abymes, Guadeloupe · Ni notaire, ni avocat — tiers neutre en médiation successorale.'
+    'TransmiExpert, Les Abymes, Guadeloupe. Ni notaire, ni avocat : tiers neutre en médiation successorale.'
   );
 }
 
@@ -119,7 +119,7 @@ export function generatePersonalWordPage(doc: PDFDoc, data: CaseFileData, pageNu
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'À ceux qui liront ces pages',
     title: 'Un mot pour les vôtres',
-    mission: 'Ni juridique, ni définitif — simplement vrai.',
+    mission: 'Ni juridique, ni définitif : simplement vrai.',
   });
 
   const word = data.caseFile?.mot_aux_proches;
@@ -176,15 +176,15 @@ export function generateFirstDaysPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     ['Jours 1 – 2', 'Faire constater le décès et obtenir le certificat médical.'],
     [
       'Jours 1 – 6',
-      'Déclarer le décès à la mairie de la commune ; contacter la pompe funèbre — les volontés et le contact choisis sont page 27.',
+      'Déclarer le décès à la mairie de la commune ; contacter la pompe funèbre. Les volontés et le contact choisis sont page 27.',
     ],
     [
       'Jours 7 – 10',
-      'Prévenir la banque, l’employeur ou les caisses de retraite, les assureurs — les contacts attendent page 9, les comptes et contrats page 15.',
+      'Prévenir la banque, l’employeur ou les caisses de retraite, les assureurs. Les contacts attendent page 9, les comptes et contrats page 15.',
     ],
     [
       'Ensuite',
-      'Prendre rendez-vous chez le notaire, avec ce livret : le résumé de la page 39 a été écrit pour lui. La pension de réversion du conjoint se demande auprès des caisses — voir page 41.',
+      'Prendre rendez-vous chez le notaire, avec ce livret : le résumé de la page 39 a été écrit pour lui. La pension de réversion du conjoint se demande auprès des caisses (voir page 41).',
     ],
   ];
 
@@ -214,7 +214,7 @@ export function generateFirstDaysPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   addPostureNote(
     doc,
     page.height - page.margin.bottom - 20,
-    'Les démarches et délais officiels peuvent évoluer : la liste complète et à jour est publiée sur service-public.fr. Cette page ordonne l’essentiel — elle ne remplace pas les organismes compétents.'
+    'Les démarches et délais officiels peuvent évoluer : la liste complète et à jour est publiée sur service-public.fr. Cette page ordonne l’essentiel, sans remplacer les organismes compétents.'
   );
 }
 
@@ -241,7 +241,7 @@ export function generateDirectoryPage(doc: PDFDoc, data: CaseFileData, pageNumbe
       'Pour trouver un notaire, ou en changer. Le notaire est l’interlocuteur central de toute succession.',
     ],
     [
-      'CGSS — Caisse générale de sécurité sociale',
+      'CGSS (Caisse générale de sécurité sociale)',
       'Pension de réversion du conjoint survivant, capital décès : les demandes se font auprès des caisses, dans des délais parfois courts.',
     ],
     [
@@ -250,7 +250,7 @@ export function generateDirectoryPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     ],
     [
       'CAF et France services',
-      'Aides et accompagnement dans les démarches en ligne — les maisons France services aident gratuitement, partout sur le territoire.',
+      'Aides et accompagnement dans les démarches en ligne. Les maisons France services aident gratuitement, partout sur le territoire.',
     ],
     [
       'service-public.fr',
@@ -299,8 +299,8 @@ export function generateLivingBookPage(
     doc,
     y,
     isBlankMode()
-      ? 'Ce livret existe aussi en version vivante : un espace personnel en ligne où chaque information saisie prépare une édition imprimée de ce livre — remplie, mise en page, rééditée à mesure que votre vie change, sans jamais rien ressaisir.'
-      : 'Votre espace personnel en ligne enrichit ce livre : chaque information ajoutée, chaque décision prise, chaque document retrouvé prépare sa prochaine édition — sans jamais rien ressaisir.'
+      ? 'Ce livret existe aussi en version vivante : un espace personnel en ligne où chaque information saisie prépare la prochaine édition imprimée de ce livre, mise à jour à mesure que votre vie change. Rien n’est jamais à ressaisir.'
+      : 'Votre espace personnel en ligne enrichit ce livre : ce que vous y ajoutez prépare sa prochaine édition, sans que vous ayez rien à ressaisir.'
   );
 
   const qrSize = 132;
@@ -326,7 +326,7 @@ export function generateLivingBookPage(
   addPostureNote(
     doc,
     page.height - page.margin.bottom - 20,
-    'transmiexpert.fr · L’espace en ligne est proposé par abonnement ; ce livret papier reste pleinement utilisable sans lui.'
+    'transmiexpert.fr. L’espace en ligne est proposé par abonnement ; ce livret papier reste pleinement utilisable sans lui.'
   );
 }
 
@@ -346,10 +346,10 @@ export function generateColophonPage(doc: PDFDoc, data: CaseFileData, pageNumber
   const edition = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
   const lines = isBlankMode()
-    ? ['Livret de Succession — édition à compléter', `TransmiExpert · ${territoire}`, `Édité en ${edition}.`]
+    ? ['Livret de Succession, édition à compléter', `TransmiExpert, ${territoire}`, `Édité en ${edition}.`]
     : [
         ownerName ? `Ce livret a été préparé pour ${ownerName}` : 'Ce livret a été préparé',
-        `par TransmiExpert · ${territoire}`,
+        `par TransmiExpert, ${territoire}`,
         `Édition de ${edition}. Il évolue avec vous.`,
       ];
 
@@ -374,7 +374,7 @@ export function generateColophonPage(doc: PDFDoc, data: CaseFileData, pageNumber
     .font(fonts.body)
     .fillColor(colors.INK)
     .text(
-      'Chez vous, à un endroit connu d’au moins une personne de confiance. Une copie peut être déposée chez votre notaire, si vous le souhaitez. Surtout : que quelqu’un sache qu’il existe — un livret que personne ne sait trouver ne protège personne.',
+      'Chez vous, à un endroit connu d’au moins une personne de confiance. Une copie peut être déposée chez votre notaire, si vous le souhaitez. Surtout : que quelqu’un sache qu’il existe. Un livret que personne ne sait trouver ne protège personne.',
       page.margin.left + 14,
       doc.y + spacing.sm,
       { width: page.width - page.margin.left - page.margin.right - 28, align: 'center', lineGap: 3 }

@@ -91,7 +91,7 @@ export function generateFamilyPage(doc: PDFDoc, data: CaseFileData, pageNumber: 
         fc.statut_conjugal === 'marie'
           ? fc.contrat_mariage_existe
             ? ', avec un contrat de mariage'
-            : ', sans contrat de mariage — le régime de la communauté s’applique donc par défaut'
+            : ', sans contrat de mariage ; le régime de la communauté s’applique donc par défaut'
           : '';
       parts.push(`Vous êtes ${statut}${regime}.`);
     }
@@ -110,7 +110,7 @@ export function generateFamilyPage(doc: PDFDoc, data: CaseFileData, pageNumber: 
       y,
       data.caseFile?.histoire_familiale ||
         fc?.notes ||
-        'Votre histoire familiale apparaîtra ici une fois racontée dans votre espace personnel — quelques lignes suffisent : qui compose votre famille, ce qui la lie, ce qu’il faut savoir pour la comprendre.'
+        'Votre histoire familiale apparaîtra ici une fois racontée dans votre espace personnel. Quelques lignes suffisent : qui compose votre famille, ce qui la lie, ce qu’il faut savoir pour la comprendre.'
     );
   }
 
@@ -125,7 +125,7 @@ export function generateFamilyPage(doc: PDFDoc, data: CaseFileData, pageNumber: 
 
   const rules = [
     'Un seul canal principal (WhatsApp, email ou téléphone), avec un court récapitulatif écrit après chaque échange important.',
-    'On échange sur les faits et les options disponibles — les intentions se discutent en réunion, pas par message.',
+    'On échange sur les faits et les options disponibles ; les intentions se discutent en réunion, pas par message.',
     'Chaque décision prise se traduit par une date, un responsable et une prochaine étape.',
   ];
   rules.forEach((r) => {
@@ -173,15 +173,15 @@ export function generateTrustPeoplePage(doc: PDFDoc, data: CaseFileData, pageNum
     doc,
     y,
     isBlankMode()
-      ? 'Notez ici les personnes en qui vous avez toute confiance pour accompagner votre entourage, en complément — jamais en remplacement — des démarches notariales.'
-      : 'Ces personnes ont été identifiées par vous comme des interlocuteurs de confiance pour votre entourage, en complément — jamais en remplacement — des démarches notariales.'
+      ? 'Notez ici les personnes en qui vous avez toute confiance pour accompagner votre entourage, en complément, jamais en remplacement, des démarches notariales.'
+      : 'Ces personnes ont été identifiées par vous comme des interlocuteurs de confiance pour votre entourage, en complément, jamais en remplacement, des démarches notariales.'
   );
 
   const rows = data.trustPeople.map((p) => [
     p.name,
     p.relationship,
     p.what_they_receive || '—',
-    [p.phone, p.email].filter(Boolean).join(' · ') || '—',
+    [p.phone, p.email].filter(Boolean).join(', ') || '—',
   ]);
 
   addLedgerTable(doc, y + spacing.sm, ['Nom', 'Lien', 'Ce qui leur revient', 'Contact'], rows, [80, 60, 110, 115], {
@@ -215,7 +215,7 @@ export function generateIncapacityPage(doc: PDFDoc, data: CaseFileData, pageNumb
   y = addNarrativeBlock(
     doc,
     y,
-    'On prépare sa succession ; on oublie souvent de préparer l’avant. Une hospitalisation, une perte d’autonomie — et ce sont les vôtres qui devraient décider sans savoir ce que vous auriez voulu. Trois dispositifs changent tout : le mandat de protection future, les directives anticipées, la personne de confiance médicale.'
+    'On prépare sa succession ; on oublie souvent de préparer l’avant. Une hospitalisation, une perte d’autonomie, et ce sont les vôtres qui devraient décider sans savoir ce que vous auriez voulu. Trois dispositifs changent tout : le mandat de protection future, les directives anticipées, la personne de confiance médicale.'
   );
   y += spacing.sm;
 
@@ -224,23 +224,23 @@ export function generateIncapacityPage(doc: PDFDoc, data: CaseFileData, pageNumb
     const docStatus = find(t);
     if (!docStatus) return undefined;
     return docStatus.existe
-      ? ['Établi', docStatus.depose_chez ? `déposé chez ${docStatus.depose_chez}` : ''].filter(Boolean).join(' — ')
+      ? (docStatus.depose_chez ? `Établi, déposé chez ${docStatus.depose_chez}` : 'Établi')
       : 'À établir';
   };
 
   y = addRestitutionField(doc, y, 'Mandat de protection future', statusOf('mandat_protection'), {
-    emptyText: 'Non renseigné — à envisager, sans urgence mais sans oubli',
+    emptyText: 'Non renseigné. À envisager, sans urgence mais sans oubli',
   });
   y = addRestitutionField(doc, y, 'Directives anticipées', statusOf('directives_anticipees'), {
-    emptyText: 'Non renseignées — quelques lignes suffisent, votre médecin peut vous guider',
+    emptyText: 'Non renseignées. Quelques lignes suffisent, et votre médecin peut vous guider',
   });
   y = addRestitutionField(doc, y, 'Personne de confiance médicale', undefined, {
-    emptyText: 'À désigner auprès de votre médecin — souvent l’une des personnes de la page précédente',
+    emptyText: 'À désigner auprès de votre médecin. C’est souvent l’une des personnes de la page précédente',
   });
 
   addPostureNote(
     doc,
     page.height - page.margin.bottom - 20,
-    'Le mandat de protection future et les directives anticipées sont des actes encadrés par la loi : leur rédaction se fait avec un professionnel du droit ou de la santé. Cette page organise vos intentions — elle ne les remplace pas.'
+    'Le mandat de protection future et les directives anticipées sont des actes encadrés par la loi : leur rédaction se fait avec un professionnel du droit ou de la santé. Cette page organise vos intentions, elle ne les remplace pas.'
   );
 }

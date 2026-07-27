@@ -195,7 +195,7 @@ export const SECTION_DIVIDERS: Record<
     proverb: 'Sé grenn diri ka fè sak diri.',
     translation: 'Ce sont les grains de riz qui font le sac de riz.',
     intro:
-      'Chaque papier compte. Cette section dit ce qui existe, où le trouver, et ce qui reste à réunir — patiemment, grain après grain.',
+      'Chaque papier compte. Cette section dit ce qui existe, où le trouver, et ce qui reste à réunir, patiemment, grain après grain.',
   },
   decisions_methode: {
     roman: 'IV',

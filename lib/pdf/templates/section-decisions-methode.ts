@@ -28,7 +28,7 @@ export function generateObjectivesPage(doc: PDFDoc, data: CaseFileData, pageNumb
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Décisions & méthode',
     title: 'Vos objectifs de transmission',
-    mission: 'Ce que vous voulez protéger, et ce que vous voulez décider — mis en mots.',
+    mission: 'Ce que vous voulez protéger, et ce que vous voulez décider, mis en mots.',
   });
 
   y = addNarrativeBlock(
@@ -137,15 +137,15 @@ export function generateRemoteFamilyPage(doc: PDFDoc, data: CaseFileData, pageNu
   y = addNarrativeBlock(
     doc,
     y,
-    'Un frère à Paris, une fille à Lyon, un cousin resté au pays : la transmission antillaise se joue presque toujours sur deux rives. Ce n’est pas un obstacle — à condition de s’organiser.'
+    'Un frère à Paris, une fille à Lyon, un cousin resté au pays : la transmission antillaise se joue presque toujours sur deux rives. Ce n’est pas un obstacle, à condition de s’organiser.'
   );
   y += spacing.sm;
 
   const tips = [
-    'Une procuration se prépare à l’avance, pas dans l’urgence — parlez-en au notaire dès maintenant.',
+    'Une procuration se prépare à l’avance, pas dans l’urgence. Parlez-en au notaire dès maintenant.',
     'Un acte notarié peut aujourd’hui se signer en visioconférence : la distance n’est plus une raison de repousser.',
     'Pour une réunion à distance, visez le créneau qui respecte les deux rives : quand il est 18 h à Paris, il est midi à Pointe-à-Pitre.',
-    'Après chaque échange important, un court récapitulatif écrit, le même pour tous — la distance amplifie les malentendus, l’écrit les éteint.',
+    'Après chaque échange important, un court récapitulatif écrit, le même pour tous. La distance amplifie les malentendus ; l’écrit les éteint.',
   ];
   tips.forEach((t) => {
     doc.circle(page.margin.left + 3, y + 6, 2).fill(colors.GOLD);
@@ -175,7 +175,7 @@ export function generateNotesPage(doc: PDFDoc, data: CaseFileData, pageNumber: n
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Décisions & méthode',
     title: 'Notes',
-    mission: 'Ce qui vous vient — questions pour le notaire, idées, choses à ne pas oublier.',
+    mission: 'Ce qui vous vient : questions pour le notaire, idées, choses à ne pas oublier.',
   });
 
   addWritingLines(doc, y, 12, { gap: 32 });

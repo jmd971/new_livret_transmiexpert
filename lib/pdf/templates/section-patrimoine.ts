@@ -44,7 +44,7 @@ export function generatePatrimonyOverviewPage(doc: PDFDoc, data: CaseFileData, p
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: "Vue d'ensemble",
-    mission: 'Une synthèse avant le détail — pour voir la situation dans son ensemble.',
+    mission: 'Une synthèse avant le détail, pour voir la situation dans son ensemble.',
   });
 
   const totalDebts = data.debts.reduce((sum, d) => sum + (Number(d.amount_estimate) || 0), 0);
@@ -155,7 +155,7 @@ export function generateDebtsPage(doc: PDFDoc, data: CaseFileData, pageNumber: n
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Dettes et créances',
-    mission: 'Ce que vous devez — et ce qu’on vous doit, y compris en famille.',
+    mission: 'Ce que vous devez, et ce qu’on vous doit. Y compris en famille.',
   });
 
   // V4.2 : deux registres. Les prêts consentis à des proches, rarement écrits,
@@ -179,7 +179,7 @@ export function generateDebtsPage(doc: PDFDoc, data: CaseFileData, pageNumber: n
 
   const owedToMeRows = owedToMe.map((d) => [d.creditor, formatAmount(d.amount_estimate), d.note || '—']);
   addLedgerTable(doc, y, ['Qui', 'Montant estimé', 'Notes'], owedToMeRows, [125, 90, 150], {
-    emptyMessage: 'Aucune créance consignée — pensez aux prêts familiaux jamais formalisés.',
+    emptyMessage: 'Aucune créance consignée. Pensez aux prêts familiaux jamais formalisés.',
     blankRows: 3,
   });
 
@@ -202,7 +202,7 @@ export function generateBusinessPage(doc: PDFDoc, data: CaseFileData, pageNumber
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Votre entreprise, votre activité',
-    mission: 'Ce que vous avez construit professionnellement — et ce que vous souhaitez pour la suite.',
+    mission: 'Ce que vous avez construit professionnellement, et ce que vous souhaitez pour la suite.',
   });
 
   if (data.businessInterests.length === 0 && !isBlankMode()) {
@@ -220,7 +220,7 @@ export function generateBusinessPage(doc: PDFDoc, data: CaseFileData, pageNumber
     : data.businessInterests;
 
   businessInterests.forEach((b) => {
-    y = addRestitutionField(doc, y, 'Entreprise', [b.nom_entreprise, b.forme_juridique].filter(Boolean).join(' — '));
+    y = addRestitutionField(doc, y, 'Entreprise', [b.nom_entreprise, b.forme_juridique ? `(${b.forme_juridique})` : ''].filter(Boolean).join(' '));
     y = addRestitutionField(doc, y, 'Votre rôle et vos parts', [b.role, b.parts_detenues].filter(Boolean).join(' · '));
     y = addRestitutionField(doc, y, 'Associés', b.associes);
     y = addRestitutionField(doc, y, 'Expert-comptable', b.expert_comptable);
@@ -248,7 +248,7 @@ export function generateDonationsPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Donations déjà consenties',
-    mission: 'Ce qui a déjà été transmis, consigné noir sur blanc — pour que chacun parte des mêmes faits.',
+    mission: 'Ce qui a déjà été transmis, consigné noir sur blanc pour que chacun parte des mêmes faits.',
   });
 
   y = addNarrativeBlock(
@@ -294,7 +294,7 @@ export function generateExistingIndivisionsPage(doc: PDFDoc, data: CaseFileData,
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Vos indivisions en cours',
-    mission: 'Les biens familiaux dont vous êtes déjà co-indivisaire — souvent le vrai point de départ.',
+    mission: 'Les biens familiaux dont vous êtes déjà co-indivisaire. Souvent le vrai point de départ.',
   });
 
   y = addNarrativeBlock(
@@ -304,7 +304,7 @@ export function generateExistingIndivisionsPage(doc: PDFDoc, data: CaseFileData,
   );
 
   const rows = data.existingIndivisions.map((i) => [
-    [i.bien, i.localisation].filter(Boolean).join(' — '),
+    [i.bien, i.localisation].filter(Boolean).join(', '),
     i.origine || '—',
     i.co_indivisaires || '—',
     i.depuis_annee || '—',
@@ -339,14 +339,14 @@ export function generateIndivisionGlossaryPage(doc: PDFDoc, data: CaseFileData, 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Quelques repères sur l’indivision',
-    mission: 'Pour comprendre les termes que vous entendrez chez le notaire — sans jargon.',
+    mission: 'Pour comprendre, sans jargon, les termes que vous entendrez chez le notaire.',
   });
 
   // Définitions précisées par Luc Silvestre (27/07/2026) — vocabulaire exact du notariat.
   const entries: Array<[string, string]> = [
     [
       'Indivision',
-      'Situation où plusieurs héritiers — les co-indivisaires — exercent un droit de propriété sur un même bien, sans savoir sur quelle partie du bien portent leurs droits. Chacun détient une quote-part : une part du tout, pas un morceau précis.',
+      'Situation où plusieurs héritiers (les co-indivisaires) exercent un droit de propriété sur un même bien, sans savoir sur quelle partie du bien portent leurs droits. Chacun détient une quote-part : une part du tout, pas un morceau précis.',
     ],
     [
       'Sortir de l’indivision',
@@ -358,7 +358,7 @@ export function generateIndivisionGlossaryPage(doc: PDFDoc, data: CaseFileData, 
     ],
     [
       'Loi Letchimy (2018, modifiée en 2024)',
-      'Texte voté pour lutter contre les indivisions qui immobilisent le foncier en Guadeloupe et dans les autres outre-mer. Si la succession est ouverte depuis plus de dix ans, la majorité absolue des co-indivisaires suffit pour décider la vente ou le partage — l’unanimité n’est plus requise. La réforme de 2024 proroge le dispositif jusqu’en 2028.',
+      'Texte voté pour lutter contre les indivisions qui immobilisent le foncier en Guadeloupe et dans les autres outre-mer. Si la succession est ouverte depuis plus de dix ans, la majorité absolue des co-indivisaires suffit pour décider la vente ou le partage ; l’unanimité n’est plus requise. La réforme de 2024 proroge le dispositif jusqu’en 2028.',
     ],
   ];
 
@@ -399,7 +399,7 @@ export function generateValuablesPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   y = addNarrativeBlock(
     doc,
     y,
-    'La montre d’un père. Une chaîne de baptême. Le meuble en courbaril de la maison familiale. Dire à qui ces objets reviennent — et pourquoi — épargne aux vôtres les malentendus les plus douloureux.'
+    'La montre d’un père. Une chaîne de baptême. Le meuble en courbaril de la maison familiale. Dire à qui ces objets reviennent, et pourquoi, épargne aux vôtres les malentendus les plus douloureux.'
   );
 
   const rows = data.valuables.map((v) => [v.objet, v.histoire || '—', v.destinataire || '—']);
@@ -438,7 +438,7 @@ export function generateLandTenurePage(doc: PDFDoc, data: CaseFileData, pageNumb
     ],
     [
       'La prescription acquisitive',
-      'Le mécanisme qui permet, sous conditions strictes, de faire reconnaître la propriété d’un bien occupé paisiblement et durablement — trente ans en droit commun, un délai ramené à dix ans dans les outre-mer par la réforme de 2024 de la loi Letchimy. C’est souvent la voie de régularisation des terrains sans titre.',
+      'Le mécanisme qui permet, sous conditions strictes, de faire reconnaître la propriété d’un bien occupé paisiblement et durablement : trente ans en droit commun, dix ans dans les outre-mer depuis la réforme de 2024 de la loi Letchimy. C’est souvent la voie de régularisation des terrains sans titre.',
     ],
     [
       'La zone des cinquante pas géométriques',
@@ -446,7 +446,7 @@ export function generateLandTenurePage(doc: PDFDoc, data: CaseFileData, pageNumb
     ],
     [
       'Pourquoi le noter ici',
-      'Si l’un de vos biens est dans l’une de ces situations, le signaler dans ce livret (pages Biens et Indivisions) fait gagner un temps précieux à vos héritiers — et au notaire.',
+      'Si l’un de vos biens est dans l’une de ces situations, le signaler dans ce livret (pages Biens et Indivisions) fait gagner un temps précieux à vos héritiers, et au notaire.',
     ],
   ];
 

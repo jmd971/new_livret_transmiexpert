@@ -18,16 +18,16 @@ export function buildDemoCaseFileData(): CaseFileData {
     caseFile: {
       id: 'edition-demonstration',
       owner_user_id: 'demo',
-      title: 'Dossier de succession — Marie-Claire Dupont',
+      title: 'Dossier de succession de Marie-Claire Dupont',
       status: 'draft',
       completion_score: 82,
       created_at: t,
       updated_at: t,
       territoire: 'guadeloupe',
       histoire_familiale:
-        "Trois enfants : Julien, resté au pays, qui a repris le fournil avec moi ; Sandra, infirmière à Lyon depuis quinze ans ; et Marc, le benjamin, installé aux Abymes. Nous sommes une famille qui parle fort et s'aime fort. Mon mari Georges est parti en 2019 — c'est en réglant sa succession que j'ai compris ce que je ne voulais pas laisser vivre à mes enfants.",
+        "Trois enfants : Julien, resté au pays, qui a repris le fournil avec moi ; Sandra, infirmière à Lyon depuis quinze ans ; et Marc, le benjamin, installé aux Abymes. Nous sommes une famille qui parle fort et s'aime fort. Mon mari Georges est parti en 2019. C'est en réglant sa succession que j'ai compris ce que je ne voulais pas laisser vivre à mes enfants.",
       mot_aux_proches:
-        "Mes enfants, si vous lisez cette page, prenez d'abord le temps qu'il faut. Ce livret n'est pas là pour vous presser : il est là pour que vous n'ayez pas à chercher, à deviner, ni à vous disputer. Tout y est. La maison, la boulangerie, le terrain de Morne-à-l'Eau — ce ne sont que des choses. Vous trois ensemble, c'est ça que votre père et moi avons construit de plus solide. Restez-le.",
+        "Mes enfants, si vous lisez cette page, prenez d'abord le temps qu'il faut. Ce livret n'est pas là pour vous presser : il est là pour que vous n'ayez pas à chercher, à deviner, ni à vous disputer. Tout y est. La maison, la boulangerie, le terrain de Morne-à-l'Eau : ce ne sont que des choses. Vous trois ensemble, c'est ça que votre père et moi avons construit de plus solide. Restez-le.",
     },
     identity: {
       id: 'd-id',
@@ -56,13 +56,13 @@ export function buildDemoCaseFileData(): CaseFileData {
     },
     keyContacts: [
       { id: 'd-c1', case_file_id: 'edition-demonstration', role: 'notaire', nom: 'Étude Me Rimane', tel: '0590 11 22 33', email: 'etude@exemple.fr', created_at: t, updated_at: t },
-      { id: 'd-c2', case_file_id: 'edition-demonstration', role: 'banque', nom: 'Crédit Agricole — agence des Abymes', tel: '0590 44 55 66', created_at: t, updated_at: t },
+      { id: 'd-c2', case_file_id: 'edition-demonstration', role: 'banque', nom: 'Crédit Agricole, agence des Abymes', tel: '0590 44 55 66', created_at: t, updated_at: t },
       { id: 'd-c3', case_file_id: 'edition-demonstration', role: 'assureur', nom: 'GFA Caraïbes', tel: '0590 77 88 99', created_at: t, updated_at: t },
     ],
     trustPeople: [
       { id: 'd-t1', name: 'Julien Dupont', relationship: 'enfant', phone: '0690 11 11 11', what_they_receive: 'Coordonne le dossier et prévient ses frère et sœur' },
       { id: 'd-t2', name: 'Sandra Dupont', relationship: 'enfant', email: 'sandra@exemple.fr', what_they_receive: 'Copie des documents importants (à Lyon)' },
-      { id: 'd-t3', name: 'Lucienne Berthelot', relationship: 'autre', phone: '0690 22 22 22', what_they_receive: 'Ma sœur — sait où tout se trouve' },
+      { id: 'd-t3', name: 'Lucienne Berthelot', relationship: 'autre', phone: '0690 22 22 22', what_they_receive: 'Ma sœur. Elle sait où tout se trouve' },
     ],
     bankAccounts: [
       { id: 'd-b1', bank_name: 'Crédit Agricole', iban_last4: '4821', note: 'Compte courant principal' },
@@ -83,14 +83,14 @@ export function buildDemoCaseFileData(): CaseFileData {
     ],
     properties: [
       { id: 'd-p1', label: 'Maison familiale', address: '12 rue des Flamboyants, Les Abymes', loan_exists: false, note: 'Construite en 1985, titre de propriété au coffre' },
-      { id: 'd-p2', label: 'Studio locatif', address: 'Résidence Karukera, Le Gosier', loan_exists: true, note: 'Crédit soldé en 2028 — loué à l’année' },
+      { id: 'd-p2', label: 'Studio locatif', address: 'Résidence Karukera, Le Gosier', loan_exists: true, note: 'Crédit soldé en 2028, loué à l’année' },
     ],
     debts: [
       { id: 'd-d1', sens: 'je_dois', creditor: 'Crédit Agricole (studio Le Gosier)', amount_estimate: 18400, note: 'Assurance emprunteur en place' },
-      { id: 'd-d2', sens: 'on_me_doit', creditor: 'Marc Dupont', amount_estimate: 6000, note: 'Aide à l’installation, 2022 — remboursement libre, jamais écrit' },
+      { id: 'd-d2', sens: 'on_me_doit', creditor: 'Marc Dupont', amount_estimate: 6000, note: 'Aide à l’installation en 2022. Remboursement libre, jamais écrit' },
     ],
     documents: [
-      { id: 'd-doc1', doc_type: 'titre_propriete', status: 'a_jour', location_hint: 'Coffre, chambre — Lucienne sait' },
+      { id: 'd-doc1', doc_type: 'titre_propriete', status: 'a_jour', location_hint: 'Coffre de la chambre. Lucienne sait' },
       { id: 'd-doc2', doc_type: 'piece_identite', status: 'a_jour', location_hint: 'Portefeuille' },
       { id: 'd-doc3', doc_type: 'assurance_vie', status: 'a_verifier', location_hint: 'Classeur bleu, bureau', note: 'Clause bénéficiaire à relire' },
       { id: 'd-doc4', doc_type: 'impots', status: 'a_jour', location_hint: 'Espace en ligne impots.gouv' },
@@ -119,7 +119,7 @@ export function buildDemoCaseFileData(): CaseFileData {
     ],
     digitalAssets: [
       { id: 'd-da1', case_file_id: 'edition-demonstration', type: 'email', fournisseur: 'Gmail', ou_trouver_acces: 'Carnet bleu, tiroir du bureau', created_at: t, updated_at: t },
-      { id: 'd-da2', case_file_id: 'edition-demonstration', type: 'abonnement', fournisseur: 'Canal+ Caraïbes', ou_trouver_acces: 'Prélèvement Crédit Agricole — à résilier', created_at: t, updated_at: t },
+      { id: 'd-da2', case_file_id: 'edition-demonstration', type: 'abonnement', fournisseur: 'Canal+ Caraïbes', ou_trouver_acces: 'Prélèvement Crédit Agricole, à résilier', created_at: t, updated_at: t },
       { id: 'd-da3', case_file_id: 'edition-demonstration', type: 'social', fournisseur: 'Facebook', ou_trouver_acces: 'Sandra a les codes', note: 'Compte à transformer en hommage', created_at: t, updated_at: t },
     ],
     businessInterests: [
@@ -131,7 +131,7 @@ export function buildDemoCaseFileData(): CaseFileData {
         parts_detenues: '60 % (Julien : 40 %)',
         associes: 'Julien Dupont',
         expert_comptable: 'Cabinet Fisca 971, Jarry',
-        devenir_souhaite: 'Que Julien reprenne l’ensemble des parts — les modalités restent à préparer avec l’expert-comptable et le notaire.',
+        devenir_souhaite: 'Que Julien reprenne l’ensemble des parts. Les modalités restent à préparer avec l’expert-comptable et le notaire.',
       },
     ],
     pastDonations: [
