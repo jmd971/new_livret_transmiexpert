@@ -9,7 +9,7 @@ import { Loader2 } from 'lucide-react';
 
 /**
  * Étape intermédiaire du tunnel : vérifie la session puis redirige vers Stripe Checkout.
- * /abonnement?plan=essentiel | accompagne
+ * /abonnement?plan=pack | accompagnee
  */
 function AbonnementInner() {
   const router = useRouter();
@@ -19,7 +19,7 @@ function AbonnementInner() {
   const [needLogin, setNeedLogin] = useState(false);
 
   useEffect(() => {
-    if (plan !== 'essentiel' && plan !== 'accompagne') {
+    if (plan !== 'pack' && plan !== 'accompagnee') {
       router.replace('/tarifs');
       return;
     }

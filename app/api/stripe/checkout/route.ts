@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getStripe, priceIdForPlan, type Plan } from '@/lib/stripe';
+import { getStripe, lineItemsForPlan, type PlanVendu } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -31,16 +31,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Session invalide ou expirée — reconnectez-vous.' }, { status: 401 });
     }
 
-    const { plan } = (await request.json()) as { plan?: Plan };
-    if (plan !== 'essentiel' && plan !== 'accompagne') {
+    const { plan } = (await request.json()) as { plan?: PlanVendu };
+    if (plan !== 'pack' && plan !== 'accompagnee') {
       return NextResponse.json({ error: 'Formule inconnue.' }, { status: 400 });
-    }
-    const priceId = priceIdForPlan(plan);
-    if (!priceId) {
-      return NextResponse.json(
-        { error: 'Paiement non configuré pour cette formule (price_id manquant).' },
-        { status: 503 }
-      );
     }
 
     const stripe = getStripe();
@@ -73,9 +66,11 @@ export async function POST(request: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
+      // Prix créés à la volée : 99 €/an récurrent + la première année en ligne unique
+      // (297 € ou 890 € au premier paiement, 99 € aux renouvellements).
+      line_items: lineItemsForPlan(plan),
       client_reference_id: user.id,
-      subscription_data: { metadata: { supabase_user_id: user.id } },
+      subscription_data: { metadata: { supabase_user_id: user.id, plan } },
       locale: 'fr',
       allow_promotion_codes: true,
       success_url: `${origin}/abonnement/merci`,

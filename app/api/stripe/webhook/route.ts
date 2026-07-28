@@ -52,6 +52,12 @@ export async function POST(request: NextRequest) {
 
     const item = sub.items.data[0];
     const priceId = item?.price?.id || '';
+    // Grille Option B : le plan est posé en métadonnée au checkout (les prix étant créés
+    // à la volée, ils n'ont pas d'identifiant stable). L'ancienne grille se reconnaît
+    // encore par son price_id.
+    const metaPlan = sub.metadata?.plan;
+    const plan =
+      metaPlan === 'pack' || metaPlan === 'accompagnee' ? metaPlan : planForPriceId(priceId);
     // current_period_end vit sur l'abonnement dans les anciennes versions d'API, et sur la
     // ligne d'abonnement depuis 2025-03-31.basil (dont 2026-03-25.dahlia) : on lit les deux.
     const periodEnd =
@@ -62,7 +68,7 @@ export async function POST(request: NextRequest) {
       user_id: userId,
       stripe_customer_id: customerId,
       stripe_subscription_id: sub.id,
-      plan: planForPriceId(priceId),
+      plan,
       status: sub.status,
       current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
       updated_at: new Date().toISOString(),
