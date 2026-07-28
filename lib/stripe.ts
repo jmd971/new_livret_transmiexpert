@@ -34,7 +34,7 @@ export const RENOUVELLEMENT_ANNUEL_CENTIMES = 9900;
 const PREMIERE_ANNEE: Record<PlanVendu, { centimes: number; libelle: string }> = {
   pack: {
     centimes: 29700 - RENOUVELLEMENT_ANNUEL_CENTIMES,
-    libelle: 'Pack Sérénité, première année : livre de 44 pages imprimé à votre nom, garantie « rempli en 90 jours »',
+    libelle: 'Pack Sérénité, première année : livre de 48 pages imprimé à votre nom, garantie « rempli en 90 jours »',
   },
   accompagnee: {
     centimes: 89000 - RENOUVELLEMENT_ANNUEL_CENTIMES,
@@ -68,7 +68,7 @@ export function lineItemsForPlan(plan: PlanVendu): Stripe.Checkout.SessionCreate
   ];
 }
 
-/** Le livre vierge (édition papier 44 pages à remplir à la main), vente sans compte. */
+/** Le livre vierge (édition papier 48 pages à remplir à la main), vente sans compte. */
 export const LIVRE_VIERGE_CENTIMES = 9000;
 
 // --- Ancienne grille mensuelle (lecture seule, pour les webhooks d'abonnements existants) ---

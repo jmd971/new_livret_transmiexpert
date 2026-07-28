@@ -18,7 +18,7 @@ const OFFRES = [
     periode: '',
     accroche: 'Le livre complet, à remplir à la main.',
     inclus: [
-      'Les 44 pages et toutes les thématiques du Livret de Succession',
+      'Les 48 pages et toutes les thématiques du Livret de Succession',
       'Édition papier reliée, format 16 × 24 cm',
       'Expédié chez vous, sans application ni abonnement',
     ],
@@ -33,7 +33,7 @@ const OFFRES = [
     accroche: 'Votre livre, imprimé à votre nom.',
     inclus: [
       'Votre espace personnel en ligne, guidé thème par thème',
-      'Votre livre de 44 pages imprimé à votre nom',
+      'Votre livre de 48 pages imprimé à votre nom',
       'Garantie « rempli en 90 jours » : sinon, on le remplit avec vous par téléphone',
       'Puis 99 € par an : votre livre réédité à chaque mise à jour',
     ],

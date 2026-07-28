@@ -4,7 +4,7 @@ import { getStripe, LIVRE_VIERGE_CENTIMES } from '@/lib/stripe';
 export const dynamic = 'force-dynamic';
 
 /**
- * Achat du livre vierge (édition papier 44 pages à remplir à la main), 90 €.
+ * Achat du livre vierge (édition papier 48 pages à remplir à la main), 90 €.
  * Volontairement SANS compte : c'est un objet qu'on achète comme un livre,
  * pas un abonnement. L'adresse de livraison est collectée par Stripe.
  */
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
             product_data: {
               name: 'Le livre vierge, Livret de Succession',
               description:
-                'Édition papier de 44 pages, à remplir à la main. Expédié en Guadeloupe, en Martinique et dans l’Hexagone.',
+                'Édition papier de 48 pages, à remplir à la main. Expédié en Guadeloupe, en Martinique et dans l’Hexagone.',
             },
           },
           quantity: 1,
