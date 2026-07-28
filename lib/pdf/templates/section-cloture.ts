@@ -176,15 +176,15 @@ export function generateFirstDaysPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     ['Jours 1 – 2', 'Faire constater le décès et obtenir le certificat médical.'],
     [
       'Jours 1 – 6',
-      'Déclarer le décès à la mairie de la commune ; contacter la pompe funèbre. Les volontés et le contact choisis sont page 27.',
+      'Déclarer le décès à la mairie de la commune ; contacter la pompe funèbre. Les volontés et le contact choisis sont page 30.',
     ],
     [
       'Jours 7 – 10',
-      'Prévenir la banque, l’employeur ou les caisses de retraite, les assureurs. Les contacts attendent page 9, les comptes et contrats page 15.',
+      'Prévenir la banque, l’employeur ou les caisses de retraite, les assureurs. Les contacts attendent page 10, les comptes et contrats page 17.',
     ],
     [
       'Ensuite',
-      'Prendre rendez-vous chez le notaire, avec ce livret : le résumé de la page 39 a été écrit pour lui. La pension de réversion du conjoint se demande auprès des caisses (voir page 41).',
+      'Prendre rendez-vous chez le notaire, avec ce livret : le résumé de la page 42 a été écrit pour lui. La pension de réversion du conjoint se demande auprès des caisses (voir page 44).',
     ],
   ];
 
@@ -246,7 +246,7 @@ export function generateDirectoryPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     ],
     [
       isGp ? 'Agence des cinquante pas géométriques de la Guadeloupe' : 'Agence des cinquante pas géométriques de la Martinique',
-      'Régularisation des occupations en zone littorale (cf. page 22).',
+      'Régularisation des occupations en zone littorale (cf. page 25).',
     ],
     [
       'CAF et France services',
@@ -396,4 +396,64 @@ export function generateColophonPage(doc: PDFDoc, data: CaseFileData, pageNumber
     .font(fonts.body)
     .fillColor(colors.GREY)
     .text(String(pageNumber).padStart(2, '0'), 0, page.height - 42, { width: page.width, align: 'center' });
+}
+
+
+/**
+ * NOUVELLE PAGE V4.3 : votre rendez-vous annuel. La page qui fait vivre le livre
+ * dans le temps : cinq années de relecture, et les événements qui déclenchent une
+ * mise à jour. C'est aussi la logique de la réédition annuelle du Pack.
+ */
+export function generateAnnualReviewPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'cloture', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Un livre qui vit',
+    title: 'Votre rendez-vous annuel',
+    mission: 'Choisissez une date qui compte, et offrez chaque année une heure à ce livre.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Un mariage, une naissance, une vente, un décès, un déménagement : chacun de ces événements mérite une relecture. Et même sans événement, une relecture par an suffit à garder ce livre fidèle à votre vie.'
+  );
+  y += spacing.md;
+
+  for (let i = 0; i < 5; i++) {
+    const rowY = y;
+    doc
+      .fontSize(fonts.size.small)
+      .font(fonts.heading)
+      .fillColor(colors.FOREST)
+      .text('Année', page.margin.left, rowY + 2);
+    doc
+      .strokeColor(colors.BORDER)
+      .lineWidth(0.5)
+      .moveTo(page.margin.left + 42, rowY + 12)
+      .lineTo(page.margin.left + 92, rowY + 12)
+      .stroke();
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text('CE QUI A CHANGÉ, CE QUE J’AI MIS À JOUR', page.margin.left + 106, rowY + 3, { characterSpacing: 0.5 });
+    doc
+      .strokeColor(colors.BORDER)
+      .lineWidth(0.5)
+      .moveTo(page.margin.left, rowY + 34)
+      .lineTo(page.width - page.margin.right, rowY + 34)
+      .stroke()
+      .moveTo(page.margin.left, rowY + 58)
+      .lineTo(page.width - page.margin.right, rowY + 58)
+      .stroke();
+    y = rowY + 58 + spacing.md;
+  }
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Abonnés : chaque mise à jour faite dans votre espace en ligne prépare l’édition suivante de ce livre.'
+  );
 }

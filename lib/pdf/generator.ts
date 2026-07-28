@@ -1,7 +1,7 @@
 /**
  * GENERATOR V4.2 — orchestrateur du Livret de Succession
  *
- * LE LIVRE : 44 pages, format 16 × 24 cm (cf. theme.ts), six sections ouvertes par des
+ * LE LIVRE : 48 pages (trois cahiers de 16), format 16 × 24 cm (cf. theme.ts), six sections ouvertes par des
  * intercalaires (proverbe créole + phrase d'entrée). Trois éditions sortent du même moteur :
  *
  *  - personnelle    : generateUnifiedPDF(data)   — le livre du client abonné, restitué ;
@@ -37,6 +37,7 @@ import {
 import {
   generateProfilePage,
   generateFamilyPage,
+  generateFamilyTreePage,
   generateContactsPage,
   generateTrustPeoplePage,
   generateIncapacityPage,
@@ -50,6 +51,8 @@ import {
   generateBusinessPage,
   generateDonationsPage,
   generateValuablesPage,
+  generateFamilyHomePage,
+  generateAssetsHistoryPage,
   generateExistingIndivisionsPage,
   generateIndivisionGlossaryPage,
   generateLandTenurePage,
@@ -80,6 +83,7 @@ import {
   generateDirectoryPage,
   generateLivingBookPage,
   generateColophonPage,
+  generateAnnualReviewPage,
 } from './templates/section-cloture';
 
 type PDFDoc = any;
@@ -119,54 +123,58 @@ function buildDocument(
   generateWelcomePage(doc, data, ++p, readerProfile); // 04 — le mot de Luc
   generateFrameworkPage(doc, data, ++p); // 05 — le cadre
 
-  // --- I · Vous et les vôtres (p. 6-11) ---
+  // --- I · Vous et les vôtres (p. 6-12) ---
   divider(doc, 'vous_et_les_votres', ++p); // 06
   generateProfilePage(doc, data, ++p); // 07
-  generateFamilyPage(doc, data, ++p); // 08 — prose interprétée + histoire familiale (V4.2)
-  generateContactsPage(doc, data, ++p); // 09
-  generateTrustPeoplePage(doc, data, ++p); // 10
-  generateIncapacityPage(doc, data, ++p); // 11 — « Prévoir l'imprévu » (NOUVEAU V4.2)
+  generateFamilyPage(doc, data, ++p); // 08
+  generateFamilyTreePage(doc, data, ++p); // 09 — arbre de famille (NOUVEAU V4.3)
+  generateContactsPage(doc, data, ++p); // 10
+  generateTrustPeoplePage(doc, data, ++p); // 11
+  generateIncapacityPage(doc, data, ++p); // 12
 
-  // --- II · Votre patrimoine (p. 12-22) ---
-  divider(doc, 'patrimoine', ++p); // 12
-  generatePatrimonyOverviewPage(doc, data, ++p); // 13
-  generatePropertiesPage(doc, data, ++p); // 14
-  generateAccountsPage(doc, data, ++p); // 15
-  generateDebtsPage(doc, data, ++p); // 16 — dettes ET créances (V4.2)
-  generateBusinessPage(doc, data, ++p); // 17
-  generateDonationsPage(doc, data, ++p); // 18
-  generateValuablesPage(doc, data, ++p); // 19 — objets & souvenirs (NOUVEAU V4.2)
-  generateExistingIndivisionsPage(doc, data, ++p); // 20
-  generateIndivisionGlossaryPage(doc, data, ++p); // 21
-  generateLandTenurePage(doc, data, ++p); // 22 — repères fonciers (NOUVEAU V4.2)
+  // --- II · Votre patrimoine (p. 13-25) ---
+  divider(doc, 'patrimoine', ++p); // 13
+  generatePatrimonyOverviewPage(doc, data, ++p); // 14
+  generatePropertiesPage(doc, data, ++p); // 15
+  generateFamilyHomePage(doc, data, ++p); // 16 — la maison familiale (NOUVEAU V4.3)
+  generateAccountsPage(doc, data, ++p); // 17
+  generateDebtsPage(doc, data, ++p); // 18
+  generateBusinessPage(doc, data, ++p); // 19
+  generateDonationsPage(doc, data, ++p); // 20
+  generateValuablesPage(doc, data, ++p); // 21
+  generateAssetsHistoryPage(doc, data, ++p); // 22 — l'histoire de nos biens (NOUVEAU V4.3)
+  generateExistingIndivisionsPage(doc, data, ++p); // 23
+  generateIndivisionGlossaryPage(doc, data, ++p); // 24
+  generateLandTenurePage(doc, data, ++p); // 25
 
-  // --- III · Documents & sécurité (p. 23-27) ---
-  divider(doc, 'documents_securite', ++p); // 23
-  generateDocumentsIndexPage(doc, data, ++p); // 24
-  generateMissingDocumentsPage(doc, data, ++p); // 25
-  generateDigitalLifePage(doc, data, ++p); // 26
-  generateEmergencyPage(doc, data, ++p); // 27
+  // --- III · Documents & sécurité (p. 26-30) ---
+  divider(doc, 'documents_securite', ++p); // 26
+  generateDocumentsIndexPage(doc, data, ++p); // 27
+  generateMissingDocumentsPage(doc, data, ++p); // 28
+  generateDigitalLifePage(doc, data, ++p); // 29
+  generateEmergencyPage(doc, data, ++p); // 30
 
-  // --- IV · Décisions & méthode (p. 28-35) ---
-  divider(doc, 'decisions_methode', ++p); // 28
-  generateObjectivesPage(doc, data, ++p); // 29
-  generateDecisionsPage(doc, data, ++p); // 30
-  generateFamilyMeetingPage(doc, data, ++p); // 31
-  generateRemoteFamilyPage(doc, data, ++p); // 32 — la famille à distance (NOUVEAU V4.2)
-  generateMeetingReportPage(doc, data, ++p); // 33
-  generateActionPlanPage(doc, data, ++p); // 34
-  generateNotesPage(doc, data, ++p); // 35 — notes (NOUVEAU V4.2)
+  // --- IV · Décisions & méthode (p. 31-38) ---
+  divider(doc, 'decisions_methode', ++p); // 31
+  generateObjectivesPage(doc, data, ++p); // 32
+  generateDecisionsPage(doc, data, ++p); // 33
+  generateFamilyMeetingPage(doc, data, ++p); // 34
+  generateRemoteFamilyPage(doc, data, ++p); // 35
+  generateMeetingReportPage(doc, data, ++p); // 36
+  generateActionPlanPage(doc, data, ++p); // 37
+  generateNotesPage(doc, data, ++p); // 38
 
-  // --- V · Clôture (p. 36-44) ---
-  divider(doc, 'cloture', ++p); // 36
-  generateDashboardPage(doc, data, ++p); // 37 — « Où en est votre dossier » (déplacé, V4.2)
-  generatePersonalWordPage(doc, data, ++p); // 38 — un mot pour les vôtres (NOUVEAU V4.2)
-  generateSummaryPage(doc, data, ++p); // 39
-  generateFirstDaysPage(doc, data, ++p); // 40 — les dix premiers jours (NOUVEAU V4.2)
-  generateDirectoryPage(doc, data, ++p); // 41 — où s'adresser (NOUVEAU V4.2)
-  generateClosingPage(doc, data, ++p); // 42
-  generateLivingBookPage(doc, data, ++p, qrPng); // 43 — un livre vivant + QR (NOUVEAU V4.2)
-  generateColophonPage(doc, data, ++p); // 44 — colophon (NOUVEAU V4.2)
+  // --- V · Clôture (p. 39-48) ---
+  divider(doc, 'cloture', ++p); // 39
+  generateDashboardPage(doc, data, ++p); // 40
+  generatePersonalWordPage(doc, data, ++p); // 41
+  generateSummaryPage(doc, data, ++p); // 42
+  generateFirstDaysPage(doc, data, ++p); // 43
+  generateDirectoryPage(doc, data, ++p); // 44
+  generateAnnualReviewPage(doc, data, ++p); // 45 — votre rendez-vous annuel (NOUVEAU V4.3)
+  generateClosingPage(doc, data, ++p); // 46
+  generateLivingBookPage(doc, data, ++p, qrPng); // 47
+  generateColophonPage(doc, data, ++p); // 48
 
   return doc;
 }

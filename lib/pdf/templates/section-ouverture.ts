@@ -408,7 +408,7 @@ export function generateBelongsPage(doc: PDFDoc, data: CaseFileData, pageNumber:
 }
 
 /**
- * NOUVELLE PAGE V4.2 — sommaire. Pagination FIXE par construction (44 pages) :
+ * NOUVELLE PAGE V4.2 — sommaire. Pagination FIXE par construction (48 pages) :
  * si l'ordre des pages change dans generator.ts, mettre ce sommaire à jour.
  */
 export function generateTOCPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
@@ -421,23 +421,24 @@ export function generateTOCPage(doc: PDFDoc, data: CaseFileData, pageNumber: num
     ['Le mot de Luc', '04', false],
     ['Le cadre de notre accompagnement', '05', false],
     ['I. Vous et les vôtres', '06', true],
-    ['Votre profil, votre famille, vos contacts', '07', false],
-    ['Personnes de confiance, prévoir l’imprévu', '10', false],
-    ['II. Votre patrimoine', '12', true],
-    ['Biens, comptes et contrats, dettes et créances', '14', false],
-    ['Entreprise, donations, objets et souvenirs', '17', false],
-    ['Indivisions en cours, repères Letchimy et fonciers', '20', false],
-    ['III. Documents & sécurité', '23', true],
-    ['Vos documents, pièces à réunir', '24', false],
-    ['Vie numérique, volontés et urgence', '26', false],
-    ['IV. Décisions & méthode', '28', true],
-    ['Objectifs, décisions en cours', '29', false],
-    ['Réunion familiale, la famille à distance', '31', false],
-    ['Compte-rendu, plan d’action, notes', '33', false],
-    ['V. Clôture', '36', true],
-    ['Où en est votre dossier, un mot pour les vôtres', '37', false],
-    ['Résumé à partager, les dix premiers jours', '39', false],
-    ['Où s’adresser, un livre vivant', '41', false],
+    ['Votre profil, votre famille, votre arbre', '07', false],
+    ['Contacts, personnes de confiance, l’imprévu', '10', false],
+    ['II. Votre patrimoine', '13', true],
+    ['Biens, la maison familiale, comptes, dettes', '15', false],
+    ['Entreprise, donations, objets et souvenirs', '19', false],
+    ['L’histoire de nos biens, indivisions, repères fonciers', '22', false],
+    ['III. Documents & sécurité', '26', true],
+    ['Vos documents, pièces à réunir', '27', false],
+    ['Vie numérique, volontés et urgence', '29', false],
+    ['IV. Décisions & méthode', '31', true],
+    ['Objectifs, décisions en cours', '32', false],
+    ['Réunion familiale, la famille à distance', '34', false],
+    ['Compte-rendu, plan d’action, notes', '36', false],
+    ['V. Clôture', '39', true],
+    ['Où en est votre dossier, un mot pour les vôtres', '40', false],
+    ['Résumé à partager, les dix premiers jours', '42', false],
+    ['Où s’adresser, votre rendez-vous annuel', '44', false],
+    ['Un livre vivant', '47', false],
   ];
 
   const width = page.width - page.margin.left - page.margin.right;

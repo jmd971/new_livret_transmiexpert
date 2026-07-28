@@ -244,3 +244,68 @@ export function generateIncapacityPage(doc: PDFDoc, data: CaseFileData, pageNumb
     'Le mandat de protection future et les directives anticipées sont des actes encadrés par la loi : leur rédaction se fait avec un professionnel du droit ou de la santé. Cette page organise vos intentions, elle ne les remplace pas.'
   );
 }
+
+
+/**
+ * NOUVELLE PAGE V4.3 (48 pages) : l'arbre de famille, à compléter à la main dans
+ * les trois éditions. Seul le nom du titulaire est prérempli quand il est connu.
+ * C'est aussi un document utile : la liste des héritiers que l'acte de notoriété
+ * officialisera un jour commence ici.
+ */
+export function generateFamilyTreePage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'vous_et_les_votres', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Vous et les vôtres',
+    title: 'Votre arbre de famille',
+    mission: 'Trois générations sur une page : ceux dont vous venez, ceux qui viennent de vous.',
+  });
+
+  const usable = page.width - page.margin.left - page.margin.right;
+  const ownerName = data.identity
+    ? [data.identity.prenoms, data.identity.nom_usage || data.identity.nom_naissance].filter(Boolean).join(' ')
+    : undefined;
+
+  const drawRow = (caption: string, count: number, boxHeight: number, prefillFirst?: string) => {
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text(caption.toUpperCase(), page.margin.left, y, { characterSpacing: 0.5 });
+    y = doc.y + 5;
+    const gap = 8;
+    const boxWidth = (usable - gap * (count - 1)) / count;
+    for (let i = 0; i < count; i++) {
+      const x = page.margin.left + i * (boxWidth + gap);
+      doc.roundedRect(x, y, boxWidth, boxHeight, 3).lineWidth(0.5).strokeColor(colors.BORDER).stroke();
+      if (i === 0 && prefillFirst) {
+        doc
+          .fontSize(fonts.size.small)
+          .font(fonts.italic)
+          .fillColor(colors.INK)
+          .text(prefillFirst, x + 6, y + boxHeight / 2 - 5, { width: boxWidth - 12, align: 'center' });
+      } else {
+        doc
+          .strokeColor(colors.BORDER)
+          .lineWidth(0.5)
+          .moveTo(x + 8, y + boxHeight - 9)
+          .lineTo(x + boxWidth - 8, y + boxHeight - 9)
+          .stroke();
+      }
+    }
+    y += boxHeight + spacing.md;
+  };
+
+  drawRow('Vos grands-parents', 4, 34);
+  drawRow('Vos parents', 2, 36);
+  drawRow('Vous, et la personne qui partage votre vie', 2, 36, isBlankMode() ? undefined : ownerName);
+  drawRow('Vos enfants', 4, 36);
+  drawRow('Vos petits-enfants', 5, 32);
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Complétez au crayon, ajoutez au fil des naissances. Le jour venu, l’acte de notoriété du notaire officialisera cette liste : autant qu’elle soit déjà claire.'
+  );
+}

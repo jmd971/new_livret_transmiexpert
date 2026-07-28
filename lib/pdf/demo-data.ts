@@ -113,7 +113,7 @@ export function buildDemoCaseFileData(): CaseFileData {
       updated_at: t,
     },
     emergencyChecklist: [
-      { id: 'd-e1', case_file_id: 'edition-demonstration', task_key: 'prevenir_notaire', status: 'done', notes: 'Prévenir Me Rimane (contact page 9)', updated_at: t },
+      { id: 'd-e1', case_file_id: 'edition-demonstration', task_key: 'prevenir_notaire', status: 'done', notes: 'Prévenir Me Rimane (contact page 10)', updated_at: t },
       { id: 'd-e2', case_file_id: 'edition-demonstration', task_key: 'prevenir_banque', status: 'todo', notes: 'Prévenir les deux banques', updated_at: t },
       { id: 'd-e3', case_file_id: 'edition-demonstration', task_key: 'contrat_obseques', status: 'done', notes: 'Activer le contrat obsèques Mare-Gaillard', updated_at: t },
     ],

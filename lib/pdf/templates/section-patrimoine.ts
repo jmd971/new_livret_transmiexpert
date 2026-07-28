@@ -28,6 +28,7 @@ import {
   addNarrativeBlock,
   addLedgerTable,
   addRestitutionField,
+  addWritingLines,
   addPostureNote,
   isBlankMode,
 } from '../components';
@@ -466,4 +467,81 @@ export function generateLandTenurePage(doc: PDFDoc, data: CaseFileData, pageNumb
     page.height - page.margin.bottom - 20,
     'Ces repères sont donnés à titre informatif. Seul votre notaire peut qualifier votre situation foncière et la procédure applicable.'
   );
+}
+
+
+/**
+ * NOUVELLE PAGE V4.3 : la maison familiale. La charge émotionnelle d'une succession
+ * antillaise se concentre presque toujours sur elle ; on lui donne sa page, avec des
+ * espaces d'écriture identiques dans les trois éditions (aucune donnée en base).
+ */
+export function generateFamilyHomePage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'La maison familiale',
+    mission: 'Celle où tout le monde revient. Dire ce que vous souhaitez pour elle, c’est déjà la protéger.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Qui pourra y vivre, faut-il la garder, qui veille sur le jardin et sur la tombe : ce sont rarement les comptes qui divisent une famille, c’est la maison. Quelques lignes écrites de votre main éviteront des années de non-dits.'
+  );
+  y += spacing.sm;
+
+  const blocks: Array<[string, number]> = [
+    ['Ce que je souhaite pour elle', 3],
+    ['Ce qui n’est pas négociable à mes yeux', 2],
+    ['Ce qui peut se discuter en famille', 2],
+    ['Qui veille sur elle aujourd’hui (clés, entretien, jardin, tombe familiale)', 2],
+  ];
+  blocks.forEach(([label, lines]) => {
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text(String(label).toUpperCase(), page.margin.left, y, { characterSpacing: 0.5 });
+    y = addWritingLines(doc, doc.y + 2, Number(lines), { gap: 26 });
+  });
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Ces souhaits guident vos proches ; leur traduction juridique (donation, testament, démembrement) se décide avec votre notaire.'
+  );
+}
+
+/**
+ * NOUVELLE PAGE V4.3 : l'histoire de nos biens. Le récit d'où viennent le terrain et
+ * la maison, transmis de parole en parole. Pour un bien sans titre, ce récit est
+ * précisément ce que la prescription acquisitive demande de reconstituer.
+ */
+export function generateAssetsHistoryPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'L’histoire de nos biens',
+    mission: 'Qui a construit, qui a acheté, qui a donné : le récit que les papiers ne racontent pas.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Le terrain acheté par un grand-père, la maison montée en coup de main un carême, la parcelle donnée de parole en parole. Écrivez ce que vous savez, même incomplet : pour un bien sans titre, ce récit d’occupation est le point de départ de toute régularisation (voir les repères fonciers, page 25).'
+  );
+  y += spacing.sm;
+
+  for (let i = 1; i <= 3; i++) {
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text(`BIEN ${i} : LEQUEL, ET SON HISTOIRE`, page.margin.left, y, { characterSpacing: 0.5 });
+    y = addWritingLines(doc, doc.y + 2, 3, { gap: 26 });
+  }
 }
