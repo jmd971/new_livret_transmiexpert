@@ -182,7 +182,8 @@ function buildDocument(
 async function makeQr(url: string): Promise<Buffer | undefined> {
   try {
     return await QRCode.toBuffer(url, {
-      width: 300,
+      // 900 px pour ~470 dpi à la taille imprimée : net en impression offset.
+      width: 900,
       margin: 1,
       color: { dark: PDF_THEME.colors.FOREST, light: PDF_THEME.colors.IVORY },
     });
