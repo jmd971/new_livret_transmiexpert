@@ -6,7 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export const dynamic = 'force-dynamic';
 
 /**
- * Webhook Stripe — unique voie d'écriture de la table subscriptions.
+ * Webhook Stripe — unique voie d'écriture des tables subscriptions et commandes.
  * Événements écoutés : checkout.session.completed, customer.subscription.updated,
  * customer.subscription.deleted. La signature est vérifiée avec STRIPE_WEBHOOK_SECRET.
  */
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       ((sub as any).current_period_end as number | undefined) ??
       ((item as any)?.current_period_end as number | undefined);
 
-    await admin.from('subscriptions').upsert({
+    const { error } = await admin.from('subscriptions').upsert({
       user_id: userId,
       stripe_customer_id: customerId,
       stripe_subscription_id: sub.id,
@@ -73,6 +73,54 @@ export async function POST(request: NextRequest) {
       current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
       updated_at: new Date().toISOString(),
     } as any);
+    // Une écriture avalée en silence, c'est un client qui a payé sans obtenir l'accès :
+    // on remonte l'erreur pour répondre 500 et laisser Stripe rejouer l'événement.
+    if (error) {
+      throw new Error(`Écriture subscriptions impossible (${sub.id}) : ${error.message}`);
+    }
+  }
+
+  /**
+   * Enregistre le livre à expédier. Toutes les formules en comportent un :
+   * le livre vierge acheté seul, et le livre imprimé au nom du client inclus dans
+   * la première année du Pack et de la Transmission accompagnée.
+   * Idempotent : une session déjà enregistrée n'est pas réécrite (le statut
+   * d'expédition posé par l'équipe survit aux rejeux d'événements).
+   */
+  async function enregistrerCommande(
+    session: Stripe.Checkout.Session,
+    type: 'livre_vierge' | 'pack' | 'accompagnee',
+    userId?: string | null
+  ) {
+    const details = session.customer_details;
+    // L'adresse de livraison vit sur session.shipping_details jusqu'à l'API 2025-03-31.basil,
+    // et sur session.collected_information.shipping_details depuis (dont 2026-03-25.dahlia).
+    const shipping =
+      ((session as any).collected_information?.shipping_details as
+        | { name?: string | null; address?: Stripe.Address | null }
+        | undefined) ??
+      ((session as any).shipping_details as
+        | { name?: string | null; address?: Stripe.Address | null }
+        | undefined);
+
+    const { error } = await admin.from('commandes').upsert(
+      {
+        type,
+        stripe_session_id: session.id,
+        stripe_customer_id:
+          typeof session.customer === 'string' ? session.customer : session.customer?.id ?? null,
+        user_id: userId ?? null,
+        email: details?.email ?? null,
+        nom: shipping?.name || details?.name || null,
+        telephone: details?.phone ?? null,
+        adresse: (shipping?.address ?? details?.address ?? null) as any,
+        montant_centimes: session.amount_total ?? null,
+      } as any,
+      { onConflict: 'stripe_session_id', ignoreDuplicates: true }
+    );
+    if (error) {
+      throw new Error(`Écriture commandes impossible (${session.id}) : ${error.message}`);
+    }
   }
 
   try {
@@ -83,6 +131,12 @@ export async function POST(request: NextRequest) {
           const subId = typeof session.subscription === 'string' ? session.subscription : session.subscription.id;
           const sub = await getStripe().subscriptions.retrieve(subId);
           await upsertFromSubscription(sub, session.client_reference_id);
+          const plan = sub.metadata?.plan || session.metadata?.produit;
+          if (plan === 'pack' || plan === 'accompagnee') {
+            await enregistrerCommande(session, plan, session.client_reference_id);
+          }
+        } else if (session.mode === 'payment' && session.metadata?.produit === 'livre_vierge') {
+          await enregistrerCommande(session, 'livre_vierge');
         }
         break;
       }
