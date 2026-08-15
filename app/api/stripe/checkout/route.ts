@@ -73,6 +73,15 @@ export async function POST(request: NextRequest) {
       subscription_data: { metadata: { supabase_user_id: user.id, plan } },
       locale: 'fr',
       allow_promotion_codes: true,
+      // Les deux formules incluent le livre imprimé au nom du client : sans adresse
+      // postale ni téléphone, la commande est inexpédiable. Stripe les collecte au
+      // paiement et le webhook les enregistre dans la table commandes.
+      // customer_update est exigé par Stripe dès qu'on collecte une adresse pour un
+      // client déjà créé (sinon : erreur à la création de la session).
+      shipping_address_collection: { allowed_countries: ['FR'] },
+      phone_number_collection: { enabled: true },
+      customer_update: { shipping: 'auto', name: 'auto', address: 'auto' },
+      metadata: { produit: plan },
       success_url: `${origin}/abonnement/merci`,
       cancel_url: `${origin}/tarifs`,
     });
