@@ -28,6 +28,7 @@ import {
   addNarrativeBlock,
   addLedgerTable,
   addRestitutionField,
+  addWritingLines,
   addPostureNote,
   isBlankMode,
 } from '../components';
@@ -44,7 +45,7 @@ export function generatePatrimonyOverviewPage(doc: PDFDoc, data: CaseFileData, p
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: "Vue d'ensemble",
-    mission: 'Une synthèse avant le détail — pour voir la situation dans son ensemble.',
+    mission: 'Une synthèse avant le détail, pour voir la situation dans son ensemble.',
   });
 
   const totalDebts = data.debts.reduce((sum, d) => sum + (Number(d.amount_estimate) || 0), 0);
@@ -96,7 +97,7 @@ export function generatePropertiesPage(doc: PDFDoc, data: CaseFileData, pageNumb
   });
 
   const rows = data.properties.map((p) => [p.label, p.address || '—', p.loan_exists ? 'Oui' : 'Non', p.note || '—']);
-  addLedgerTable(doc, y, ['Bien', 'Adresse', 'Crédit en cours', 'Notes'], rows, [110, 155, 90, 160], {
+  addLedgerTable(doc, y, ['Bien', 'Adresse', 'Crédit en cours', 'Notes'], rows, [95, 120, 60, 90], {
     emptyMessage: 'Aucun bien renseigné pour le moment.',
   });
 }
@@ -112,7 +113,7 @@ export function generateAccountsPage(doc: PDFDoc, data: CaseFileData, pageNumber
   });
 
   const accountRows = data.bankAccounts.map((a) => [a.bank_name, a.iban_last4 ? `····${a.iban_last4}` : '—', a.note || '—']);
-  y = addLedgerTable(doc, y, ['Banque', 'IBAN (4 derniers chiffres)', 'Notes'], accountRows, [180, 170, 165], {
+  y = addLedgerTable(doc, y, ['Banque', 'IBAN (4 derniers chiffres)', 'Notes'], accountRows, [105, 110, 150], {
     emptyMessage: 'Aucun compte bancaire renseigné pour le moment.',
   });
 
@@ -124,15 +125,20 @@ export function generateAccountsPage(doc: PDFDoc, data: CaseFileData, pageNumber
     i.type,
     i.company,
     i.contract_ref || '—',
-    CLAUSE_BENEFICIAIRE_LABELS[i.clause_beneficiaire_statut || 'non_renseigne'] || 'Non renseignée',
-    i.clause_derniere_revision || '—',
+    // Format livre 16×24 : la date de dernière révision rejoint la colonne clause.
+    [
+      CLAUSE_BENEFICIAIRE_LABELS[i.clause_beneficiaire_statut || 'non_renseigne'] || 'Non renseignée',
+      i.clause_derniere_revision ? `(${i.clause_derniere_revision})` : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
   ]);
   y = addLedgerTable(
     doc,
     y,
-    ['Type', 'Compagnie', 'N° de contrat', 'Clause bénéficiaire', 'Dernière révision'],
+    ['Type', 'Compagnie', 'N° de contrat', 'Clause bénéficiaire'],
     insuranceRows,
-    [80, 105, 90, 96, 90],
+    [70, 105, 95, 95],
     { emptyMessage: 'Aucune assurance renseignée pour le moment.' }
   );
 
@@ -149,14 +155,40 @@ export function generateDebtsPage(doc: PDFDoc, data: CaseFileData, pageNumber: n
 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
-    title: 'Vos dettes et engagements',
-    mission: 'Une vision claire de ce qui reste à régler.',
+    title: 'Dettes et créances',
+    mission: 'Ce que vous devez, et ce qu’on vous doit. Y compris en famille.',
   });
 
-  const rows = data.debts.map((d) => [d.creditor, formatAmount(d.amount_estimate), d.note || '—']);
-  addLedgerTable(doc, y, ['Créancier', 'Montant estimé', 'Notes'], rows, [180, 130, 205], {
+  // V4.2 : deux registres. Les prêts consentis à des proches, rarement écrits,
+  // sont l'une des premières sources de désaccord d'une succession.
+  const owed = data.debts.filter((d) => (d.sens || 'je_dois') === 'je_dois');
+  const owedToMe = data.debts.filter((d) => d.sens === 'on_me_doit');
+
+  const owedRows = owed.map((d) => [d.creditor, formatAmount(d.amount_estimate), d.note || '—']);
+  y = addLedgerTable(doc, y, ['Créancier', 'Montant estimé', 'Notes'], owedRows, [125, 90, 150], {
     emptyMessage: 'Aucune dette renseignée pour le moment.',
+    blankRows: 4,
   });
+
+  y += spacing.lg;
+  doc
+    .fontSize(fonts.size.small)
+    .font(fonts.heading)
+    .fillColor(colors.FOREST)
+    .text('Ce qu’on vous doit', page.margin.left, y);
+  y = doc.y + spacing.sm;
+
+  const owedToMeRows = owedToMe.map((d) => [d.creditor, formatAmount(d.amount_estimate), d.note || '—']);
+  addLedgerTable(doc, y, ['Qui', 'Montant estimé', 'Notes'], owedToMeRows, [125, 90, 150], {
+    emptyMessage: 'Aucune créance consignée. Pensez aux prêts familiaux jamais formalisés.',
+    blankRows: 3,
+  });
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Consigner une créance familiale n’est pas la réclamer : c’est éviter que le souvenir n’en divise les vôtres.'
+  );
 }
 
 /**
@@ -171,7 +203,7 @@ export function generateBusinessPage(doc: PDFDoc, data: CaseFileData, pageNumber
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Votre entreprise, votre activité',
-    mission: 'Ce que vous avez construit professionnellement — et ce que vous souhaitez pour la suite.',
+    mission: 'Ce que vous avez construit professionnellement, et ce que vous souhaitez pour la suite.',
   });
 
   if (data.businessInterests.length === 0 && !isBlankMode()) {
@@ -189,7 +221,7 @@ export function generateBusinessPage(doc: PDFDoc, data: CaseFileData, pageNumber
     : data.businessInterests;
 
   businessInterests.forEach((b) => {
-    y = addRestitutionField(doc, y, 'Entreprise', [b.nom_entreprise, b.forme_juridique].filter(Boolean).join(' — '));
+    y = addRestitutionField(doc, y, 'Entreprise', [b.nom_entreprise, b.forme_juridique ? `(${b.forme_juridique})` : ''].filter(Boolean).join(' '));
     y = addRestitutionField(doc, y, 'Votre rôle et vos parts', [b.role, b.parts_detenues].filter(Boolean).join(' · '));
     y = addRestitutionField(doc, y, 'Associés', b.associes);
     y = addRestitutionField(doc, y, 'Expert-comptable', b.expert_comptable);
@@ -217,7 +249,7 @@ export function generateDonationsPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Donations déjà consenties',
-    mission: 'Ce qui a déjà été transmis, consigné noir sur blanc — pour que chacun parte des mêmes faits.',
+    mission: 'Ce qui a déjà été transmis, consigné noir sur blanc pour que chacun parte des mêmes faits.',
   });
 
   y = addNarrativeBlock(
@@ -239,7 +271,7 @@ export function generateDonationsPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     y + spacing.sm,
     ['Bénéficiaire', 'Nature', 'Date', 'Formalisation', 'Valeur estimée'],
     rows,
-    [105, 100, 70, 96, 90],
+    [80, 80, 50, 75, 80],
     { emptyMessage: 'Aucune donation consignée pour le moment.' }
   );
 
@@ -263,7 +295,7 @@ export function generateExistingIndivisionsPage(doc: PDFDoc, data: CaseFileData,
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Vos indivisions en cours',
-    mission: 'Les biens familiaux dont vous êtes déjà co-indivisaire — souvent le vrai point de départ.',
+    mission: 'Les biens familiaux dont vous êtes déjà co-indivisaire. Souvent le vrai point de départ.',
   });
 
   y = addNarrativeBlock(
@@ -273,7 +305,7 @@ export function generateExistingIndivisionsPage(doc: PDFDoc, data: CaseFileData,
   );
 
   const rows = data.existingIndivisions.map((i) => [
-    [i.bien, i.localisation].filter(Boolean).join(' — '),
+    [i.bien, i.localisation].filter(Boolean).join(', '),
     i.origine || '—',
     i.co_indivisaires || '—',
     i.depuis_annee || '—',
@@ -285,7 +317,7 @@ export function generateExistingIndivisionsPage(doc: PDFDoc, data: CaseFileData,
     y + spacing.sm,
     ['Bien', 'Origine', 'Co-indivisaires', 'Depuis', 'Situation'],
     rows,
-    [115, 85, 125, 50, 86],
+    [95, 70, 95, 40, 65],
     { emptyMessage: 'Aucune indivision renseignée pour le moment.' }
   );
 
@@ -308,25 +340,26 @@ export function generateIndivisionGlossaryPage(doc: PDFDoc, data: CaseFileData, 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre patrimoine',
     title: 'Quelques repères sur l’indivision',
-    mission: 'Pour comprendre les termes que vous entendrez chez le notaire — sans jargon.',
+    mission: 'Pour comprendre, sans jargon, les termes que vous entendrez chez le notaire.',
   });
 
+  // Définitions précisées par Luc Silvestre (27/07/2026) — vocabulaire exact du notariat.
   const entries: Array<[string, string]> = [
     [
       'Indivision',
-      'Situation où un bien appartient à plusieurs héritiers en même temps, sans qu’il soit encore partagé entre eux.',
+      'Situation où plusieurs héritiers (les co-indivisaires) exercent un droit de propriété sur un même bien, sans savoir sur quelle partie du bien portent leurs droits. Chacun détient une quote-part : une part du tout, pas un morceau précis.',
     ],
     [
-      'Loi Letchimy',
-      "Texte qui facilite, en Guadeloupe et dans les autres territoires d'outre-mer concernés, la vente ou le partage d'un bien en indivision ouverte depuis plus de dix ans, sans exiger l'accord de tous les héritiers.",
-    ],
-    [
-      'Sortie d’indivision',
-      'Le moment où le bien est finalement partagé, vendu ou attribué à l’un des héritiers — mettant fin à la copropriété entre tous.',
+      'Sortir de l’indivision',
+      'Trois voies y mènent : le partage entre tous les héritiers ; la vente à un héritier (la licitation) ; ou l’attribution du bien à un héritier, qui verse aux autres une compensation appelée soulte. Le but est le même : mettre fin à l’indivision successorale.',
     ],
     [
       'Acte de notoriété',
-      'Document établi par le notaire qui identifie officiellement les héritiers d’une personne décédée.',
+      'Document notarié qui liste officiellement tous les héritiers du défunt (le « de cujus », comme l’écrivent les notaires). C’est lui qui dit qui hérite.',
+    ],
+    [
+      'Loi Letchimy (2018, modifiée en 2024)',
+      'Texte voté pour lutter contre les indivisions qui immobilisent le foncier en Guadeloupe et dans les autres outre-mer. Si la succession est ouverte depuis plus de dix ans, la majorité absolue des co-indivisaires suffit pour décider la vente ou le partage ; l’unanimité n’est plus requise. La réforme de 2024 proroge le dispositif jusqu’en 2028.',
     ],
   ];
 
@@ -346,4 +379,169 @@ export function generateIndivisionGlossaryPage(doc: PDFDoc, data: CaseFileData, 
     page.height - page.margin.bottom - 20,
     "Ces définitions sont données à titre informatif et pédagogique. Seul votre notaire peut qualifier votre situation et vous conseiller sur la procédure applicable."
   );
+}
+
+
+/**
+ * NOUVELLE PAGE V4.2 — objets de valeur et souvenirs (table `valuables`).
+ * Les successions se déchirent rarement sur les comptes : plus souvent sur un objet
+ * que deux personnes aimaient. Nommer les choses, c'est déjà apaiser.
+ */
+export function generateValuablesPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'Objets de valeur et souvenirs',
+    mission: 'Il y a ce qui a un prix, et ce qui a une histoire.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'La montre d’un père. Une chaîne de baptême. Le meuble en courbaril de la maison familiale. Dire à qui ces objets reviennent, et pourquoi, épargne aux vôtres les malentendus les plus douloureux.'
+  );
+
+  const rows = data.valuables.map((v) => [v.objet, v.histoire || '—', v.destinataire || '—']);
+  addLedgerTable(doc, y + spacing.sm, ['Objet', 'Son histoire', 'À qui il revient'], rows, [95, 155, 115], {
+    emptyMessage: 'Aucun objet consigné pour le moment.',
+    blankRows: 6,
+  });
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Ces souhaits ont une valeur morale ; leur portée juridique éventuelle (legs, donation) se règle avec votre notaire.'
+  );
+}
+
+/**
+ * NOUVELLE PAGE V4.2 — repères fonciers antillais : le titre de propriété et les
+ * cinquante pas géométriques. Complète la page Letchimy : le triptyque foncier
+ * (indivision · sans-titre · cinquante pas) est ainsi couvert en langage clair.
+ * Registre strictement descriptif, renvoi systématique au notaire.
+ */
+export function generateLandTenurePage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'Repères fonciers : le titre et les cinquante pas',
+    mission: 'Aux Antilles, la maison peut être à vous sans qu’aucun papier ne le dise.',
+  });
+
+  const entries: Array<[string, string]> = [
+    [
+      'Le titre de propriété',
+      'Le document officiel qui prouve à qui appartient un bien. Beaucoup de terrains familiaux se transmettent de parole en parole, sans titre : la succession s’enlise alors, faute de pouvoir prouver qui possède quoi.',
+    ],
+    [
+      'La prescription acquisitive',
+      'Le mécanisme qui permet, sous conditions strictes, de faire reconnaître la propriété d’un bien occupé paisiblement et durablement : trente ans en droit commun, dix ans dans les outre-mer depuis la réforme de 2024 de la loi Letchimy. C’est souvent la voie de régularisation des terrains sans titre.',
+    ],
+    [
+      'La zone des cinquante pas géométriques',
+      'La bande littorale qui appartient historiquement à l’État. Des familles y sont installées de longue date : des procédures de régularisation existent, portées par les agences des cinquante pas de Guadeloupe et de Martinique.',
+    ],
+    [
+      'Pourquoi le noter ici',
+      'Si l’un de vos biens est dans l’une de ces situations, le signaler dans ce livret (pages Biens et Indivisions) fait gagner un temps précieux à vos héritiers, et au notaire.',
+    ],
+  ];
+
+  entries.forEach(([term, def]) => {
+    doc.fontSize(fonts.size.medium).font(fonts.heading).fillColor(colors.FOREST).text(term, page.margin.left, y);
+    y = doc.y + 2;
+    doc
+      .fontSize(fonts.size.body)
+      .font(fonts.body)
+      .fillColor(colors.INK)
+      .text(def, page.margin.left, y, { width: page.width - page.margin.left - page.margin.right, lineGap: 2 });
+    y = doc.y + spacing.md;
+  });
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Ces repères sont donnés à titre informatif. Seul votre notaire peut qualifier votre situation foncière et la procédure applicable.'
+  );
+}
+
+
+/**
+ * NOUVELLE PAGE V4.3 : la maison familiale. La charge émotionnelle d'une succession
+ * antillaise se concentre presque toujours sur elle ; on lui donne sa page, avec des
+ * espaces d'écriture identiques dans les trois éditions (aucune donnée en base).
+ */
+export function generateFamilyHomePage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'La maison familiale',
+    mission: 'Celle où tout le monde revient. Dire ce que vous souhaitez pour elle, c’est déjà la protéger.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Qui pourra y vivre, faut-il la garder, qui veille sur le jardin et sur la tombe : ce sont rarement les comptes qui divisent une famille, c’est la maison. Quelques lignes écrites de votre main éviteront des années de non-dits.'
+  );
+  y += spacing.sm;
+
+  const blocks: Array<[string, number]> = [
+    ['Ce que je souhaite pour elle', 3],
+    ['Ce qui n’est pas négociable à mes yeux', 2],
+    ['Ce qui peut se discuter en famille', 2],
+    ['Qui veille sur elle aujourd’hui (clés, entretien, jardin, tombe familiale)', 2],
+  ];
+  blocks.forEach(([label, lines]) => {
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text(String(label).toUpperCase(), page.margin.left, y, { characterSpacing: 0.5 });
+    y = addWritingLines(doc, doc.y + 2, Number(lines), { gap: 26 });
+  });
+
+  addPostureNote(
+    doc,
+    page.height - page.margin.bottom - 20,
+    'Ces souhaits guident vos proches ; leur traduction juridique (donation, testament, démembrement) se décide avec votre notaire.'
+  );
+}
+
+/**
+ * NOUVELLE PAGE V4.3 : l'histoire de nos biens. Le récit d'où viennent le terrain et
+ * la maison, transmis de parole en parole. Pour un bien sans titre, ce récit est
+ * précisément ce que la prescription acquisitive demande de reconstituer.
+ */
+export function generateAssetsHistoryPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'patrimoine', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Votre patrimoine',
+    title: 'L’histoire de nos biens',
+    mission: 'Qui a construit, qui a acheté, qui a donné : le récit que les papiers ne racontent pas.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Le terrain acheté par un grand-père, la maison montée en coup de main un carême, la parcelle donnée de parole en parole. Écrivez ce que vous savez, même incomplet : pour un bien sans titre, ce récit d’occupation est le point de départ de toute régularisation (voir les repères fonciers, page 25).'
+  );
+  y += spacing.sm;
+
+  for (let i = 1; i <= 3; i++) {
+    doc
+      .fontSize(fonts.size.tiny)
+      .font(fonts.body)
+      .fillColor(colors.GREY)
+      .text(`BIEN ${i} : LEQUEL, ET SON HISTOIRE`, page.margin.left, y, { characterSpacing: 0.5 });
+    y = addWritingLines(doc, doc.y + 2, 3, { gap: 26 });
+  }
 }

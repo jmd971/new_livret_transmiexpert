@@ -8,7 +8,14 @@
  */
 
 import { PDF_THEME } from '../theme';
-import { addPageChrome, addPageTitle, addNarrativeBlock, addLedgerTable, addPostureNote } from '../components';
+import {
+  addPageChrome,
+  addPageTitle,
+  addNarrativeBlock,
+  addLedgerTable,
+  addPostureNote,
+  addWritingLines,
+} from '../components';
 import type { CaseFileData } from '../types';
 
 type PDFDoc = any;
@@ -21,7 +28,7 @@ export function generateObjectivesPage(doc: PDFDoc, data: CaseFileData, pageNumb
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Décisions & méthode',
     title: 'Vos objectifs de transmission',
-    mission: 'Ce que vous voulez protéger, et ce que vous voulez décider — mis en mots.',
+    mission: 'Ce que vous voulez protéger, et ce que vous voulez décider, mis en mots.',
   });
 
   y = addNarrativeBlock(
@@ -49,7 +56,7 @@ export function generateDecisionsPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     mission: 'Un point d’étape honnête sur ce qui bloque et ce qui est déjà tranché.',
   });
 
-  addLedgerTable(doc, y, ['Sujet', 'Option envisagée', 'Statut'], [], [180, 180, 115], {
+  addLedgerTable(doc, y, ['Sujet', 'Option envisagée', 'Statut'], [], [135, 140, 90], {
     emptyMessage: 'Renseignez ici, au fil de vos échanges, les sujets qui appellent une décision.',
   });
 }
@@ -71,7 +78,7 @@ export function generateFamilyMeetingPage(doc: PDFDoc, data: CaseFileData, pageN
   );
 
   y += spacing.lg;
-  addLedgerTable(doc, y, ['Participant', 'Rôle', 'Présence', 'Canal'], [], [140, 90, 90, 155], {
+  addLedgerTable(doc, y, ['Participant', 'Rôle', 'Présence', 'Canal'], [], [105, 70, 70, 120], {
     emptyMessage: 'Listez ici les participants attendus et leur mode de présence.',
   });
 }
@@ -86,7 +93,7 @@ export function generateMeetingReportPage(doc: PDFDoc, data: CaseFileData, pageN
     mission: 'Un récapitulatif clair, pour que personne ne reparte avec une version différente.',
   });
 
-  addLedgerTable(doc, y, ['Action', 'Responsable', 'Échéance', 'Statut'], [], [155, 110, 100, 110], {
+  addLedgerTable(doc, y, ['Action', 'Responsable', 'Échéance', 'Statut'], [], [115, 90, 75, 85], {
     emptyMessage: 'Consignez ici les décisions prises et les actions qui en découlent.',
   });
 }
@@ -101,7 +108,7 @@ export function generateActionPlanPage(doc: PDFDoc, data: CaseFileData, pageNumb
     mission: 'Une seule page pour piloter les 30 prochains jours.',
   });
 
-  addLedgerTable(doc, y, ['Tâche', 'Responsable', 'Date', 'Statut'], [], [155, 110, 90, 120], {
+  addLedgerTable(doc, y, ['Tâche', 'Responsable', 'Date', 'Statut'], [], [115, 90, 70, 90], {
     emptyMessage: 'Listez ici les prochaines étapes concrètes, avec une date pour chacune.',
   });
 
@@ -110,4 +117,66 @@ export function generateActionPlanPage(doc: PDFDoc, data: CaseFileData, pageNumb
     page.height - page.margin.bottom - 20,
     'Rappel utile : une relance efficace, c’est toujours une date, un canal et un résultat attendu.'
   );
+}
+
+
+/**
+ * NOUVELLE PAGE V4.2 — la famille à distance. Une succession antillaise se joue
+ * presque toujours sur deux rives : héritiers en métropole, décalage horaire, procurations.
+ */
+export function generateRemoteFamilyPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'decisions_methode', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Décisions & méthode',
+    title: 'La famille à distance',
+    mission: 'Préparer une transmission quand les vôtres sont à 7 000 kilomètres.',
+  });
+
+  y = addNarrativeBlock(
+    doc,
+    y,
+    'Un frère à Paris, une fille à Lyon, un cousin resté au pays : la transmission antillaise se joue presque toujours sur deux rives. Ce n’est pas un obstacle, à condition de s’organiser.'
+  );
+  y += spacing.sm;
+
+  const tips = [
+    'Une procuration se prépare à l’avance, pas dans l’urgence. Parlez-en au notaire dès maintenant.',
+    'Un acte notarié peut aujourd’hui se signer en visioconférence : la distance n’est plus une raison de repousser.',
+    'Pour une réunion à distance, visez le créneau qui respecte les deux rives : quand il est 18 h à Paris, il est midi à Pointe-à-Pitre.',
+    'Après chaque échange important, un court récapitulatif écrit, le même pour tous. La distance amplifie les malentendus ; l’écrit les éteint.',
+  ];
+  tips.forEach((t) => {
+    doc.circle(page.margin.left + 3, y + 6, 2).fill(colors.GOLD);
+    doc
+      .fontSize(fonts.size.body)
+      .font(fonts.body)
+      .fillColor(colors.INK)
+      .text(t, page.margin.left + 14, y, { width: page.width - page.margin.left - page.margin.right - 14, lineGap: 2 });
+    y = doc.y + spacing.sm;
+  });
+
+  y += spacing.md;
+  addLedgerTable(doc, y, ['Proche éloigné', 'Ville', 'Procuration ?'], [], [140, 120, 105], {
+    emptyMessage: 'Notez ici les vôtres installés loin, et où en est leur procuration.',
+    blankRows: 4,
+  });
+}
+
+/**
+ * NOUVELLE PAGE V4.2 — page de notes lignée. Un livre papier vit avec un stylo ;
+ * à l'écran, elle marque la respiration avant la clôture.
+ */
+export function generateNotesPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'decisions_methode', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, {
+    kicker: 'Décisions & méthode',
+    title: 'Notes',
+    mission: 'Ce qui vous vient : questions pour le notaire, idées, choses à ne pas oublier.',
+  });
+
+  addWritingLines(doc, y, 12, { gap: 32 });
 }

@@ -38,26 +38,26 @@ export function generateCoverPage(doc: PDFDoc, data: CaseFileData) {
     .fontSize(fonts.size.small)
     .font(fonts.body)
     .fillColor(colors.GREY)
-    .text('TRANSMIEXPERT', 0, 90, { width: page.width, align: 'center', characterSpacing: 2 });
+    .text('TRANSMIEXPERT', 0, page.height * 0.13, { width: page.width, align: 'center', characterSpacing: 2 });
 
   doc
     .strokeColor(colors.GOLD)
     .lineWidth(1)
-    .moveTo(centerX - 40, 118)
-    .lineTo(centerX + 40, 118)
+    .moveTo(centerX - 40, page.height * 0.13 + 26)
+    .lineTo(centerX + 40, page.height * 0.13 + 26)
     .stroke();
 
   doc
     .fontSize(fonts.size.huge)
     .font(fonts.heading)
     .fillColor(colors.INK)
-    .text('Livret de Succession', 0, 300, { width: page.width, align: 'center' });
+    .text('Livret de Succession', 0, page.height * 0.4, { width: page.width, align: 'center' });
 
   doc
     .fontSize(fonts.size.large)
     .font(fonts.italic)
     .fillColor(colors.FOREST)
-    .text(isBlankMode() ? 'Pack Sérénité · Édition papier' : 'Pack Sérénité · Dossier personnel', 0, 360, {
+    .text(isBlankMode() ? 'Pack Sérénité, édition papier' : 'Pack Sérénité, dossier personnel', 0, page.height * 0.475, {
       width: page.width,
       align: 'center',
     });
@@ -68,19 +68,19 @@ export function generateCoverPage(doc: PDFDoc, data: CaseFileData) {
       .fontSize(fonts.size.tiny)
       .font(fonts.body)
       .fillColor(colors.GREY)
-      .text('CE LIVRET APPARTIENT À', 0, 432, { width: page.width, align: 'center', characterSpacing: 1 });
+      .text('CE LIVRET APPARTIENT À', 0, page.height * 0.60, { width: page.width, align: 'center', characterSpacing: 1 });
     doc
       .strokeColor(colors.BORDER)
       .lineWidth(0.5)
-      .moveTo(centerX - 110, 476)
-      .lineTo(centerX + 110, 476)
+      .moveTo(centerX - 110, page.height * 0.60 + 42)
+      .lineTo(centerX + 110, page.height * 0.60 + 42)
       .stroke();
   } else if (ownerName) {
     doc
       .fontSize(fonts.size.medium)
       .font(fonts.body)
       .fillColor(colors.INK)
-      .text(`Préparé pour ${ownerName}`, 0, 440, { width: page.width, align: 'center' });
+      .text(`Préparé pour ${ownerName}`, 0, page.height * 0.61, { width: page.width, align: 'center' });
   }
 
   if (!isBlankMode()) {
@@ -124,13 +124,13 @@ export function generateWelcomePage(
 
   const openingByProfile: Record<ReaderProfile, string> = {
     crise:
-      "Vous traversez une période où beaucoup de choses demandent à être clarifiées en même temps. Ce livret ne va pas tout résoudre d'un coup — mais il rassemble, page après page, ce qui est déjà su, pour que vous n'ayez plus à le porter seul dans votre tête. Commencez par les pages qui vous concernent le plus aujourd'hui : le reste attendra.",
+      "Vous traversez une période où beaucoup de choses demandent à être clarifiées en même temps. Ce livret ne va pas tout résoudre d'un coup, mais il rassemble, page après page, ce qui est déjà su, pour que vous n'ayez plus à le porter seul dans votre tête. Commencez par les pages qui vous concernent le plus aujourd'hui : le reste attendra.",
     anticipateur:
-      "Vous avez fait le choix, rare et précieux, de vous en occuper avant que la situation ne l'impose. Ce livret rassemble ce que vous nous avez confié — votre famille, votre patrimoine, vos volontés — dans un seul document que vous pourrez enrichir, partager ou simplement garder à portée de main.",
+      "Vous avez fait le choix, rare et précieux, de vous en occuper avant que la situation ne l'impose. Ce livret rassemble ce que vous nous avez confié : votre famille, votre patrimoine, vos volontés. Un seul document, que vous pourrez enrichir, partager ou simplement garder à portée de main.",
   };
 
   const blankOpening =
-    "Ce livret est le vôtre. Page après page, il vous invite à consigner ce qui compte — votre famille, votre patrimoine, vos volontés — dans un seul document que vous pourrez enrichir à votre rythme, partager ou simplement garder à portée de main.";
+    "Ce livret est le vôtre. Page après page, il vous invite à consigner ce qui compte : votre famille, votre patrimoine, vos volontés. Un seul document, que vous enrichissez à votre rythme, à partager ou simplement garder à portée de main.";
 
   y = addNarrativeBlock(doc, y, isBlankMode() ? blankOpening : openingByProfile[readerProfile]);
   y += spacing.md;
@@ -138,7 +138,7 @@ export function generateWelcomePage(
   y = addPullQuote(
     doc,
     y,
-    "Mon rôle n'est pas de décider pour vous, mais de vous aider à voir clairement — et à avancer, à votre rythme.",
+    "Mon rôle n'est pas de décider pour vous, mais de vous aider à voir clairement, et à avancer à votre rythme.",
     'Luc Silvestre, TransmiExpert'
   );
 
@@ -159,7 +159,7 @@ export function generateWelcomePage(
       ]
     : [
         'Chaque section restitue ce que vous avez déjà renseigné dans votre espace personnel.',
-        "Les mentions « à compléter » ne sont jamais un jugement — c'est une invitation à revenir enrichir votre dossier quand vous le souhaitez.",
+        "Les mentions « à compléter » ne sont jamais un jugement, mais une invitation à revenir enrichir votre dossier quand vous le souhaitez.",
         'La dernière page rassemble un résumé à partager, si vous le souhaitez, avec un proche ou un notaire.',
       ];
   bullets.forEach((b) => {
@@ -175,14 +175,16 @@ export function generateWelcomePage(
 
 export function generateDashboardPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
   doc.addPage();
-  addPageChrome(doc, { section: 'ouverture', pageNumber });
+  // V4.2 : la page vit désormais dans la section Clôture (on ouvre un livre sur l'élan,
+  // pas sur une note) — le chrome suit.
+  addPageChrome(doc, { section: 'cloture', pageNumber });
 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Votre situation en un regard',
     title: isBlankMode() ? 'Votre livret, à votre rythme' : 'Où en est votre dossier',
     mission: isBlankMode()
-      ? 'Quelques repères à tenir à jour — pour vous, et pour ceux qui ouvriront ce livret un jour.'
-      : 'Un repère, pas une note — pour savoir ce qui est déjà solide et ce qui peut encore être enrichi.',
+      ? 'Quelques repères à tenir à jour, pour vous et pour ceux qui ouvriront ce livret un jour.'
+      : 'Un repère, pas une note : pour savoir ce qui est déjà solide et ce qui peut encore être enrichi.',
   });
 
   if (isBlankMode()) {
@@ -234,7 +236,7 @@ export function generateDashboardPage(doc: PDFDoc, data: CaseFileData, pageNumbe
     y = addNarrativeBlock(
       doc,
       y,
-      "Ce livret évolue avec vous. Chaque information ajoutée dans votre espace personnel enrichira la prochaine version — sans que vous ayez à tout ressaisir."
+      "Ce livret évolue avec vous. Chaque information ajoutée dans votre espace personnel enrichira la prochaine version, sans que vous ayez à tout ressaisir."
     );
   }
 }
@@ -246,7 +248,7 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
 
   let y = addPageTitle(doc, page.margin.top, {
     kicker: 'Le cadre de notre accompagnement',
-    title: 'Ce que ce livret est — et ce qu’il n’est pas',
+    title: 'Ce que ce livret est, et ce qu’il n’est pas',
   });
 
   y = addNarrativeBlock(
@@ -262,7 +264,7 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   y = addNarrativeBlock(
     doc,
     y,
-    "TransmiExpert n'est ni notaire, ni avocat, ni expert-comptable. Notre rôle est celui d'un tiers neutre : nous facilitons le dialogue, organisons l'information et préparons le terrain — les actes et le conseil juridique restent, à chaque étape, l'affaire des professionnels du droit."
+    "TransmiExpert n'est ni notaire, ni avocat, ni expert-comptable. Notre rôle est celui d'un tiers neutre : nous facilitons le dialogue, organisons l'information et préparons le terrain. Les actes et le conseil juridique restent, à chaque étape, l'affaire des professionnels du droit."
   );
 
   y += spacing.xl;
@@ -282,6 +284,184 @@ export function generateFrameworkPage(doc: PDFDoc, data: CaseFileData, pageNumbe
   addPostureNote(
     doc,
     page.height - page.margin.bottom - 20,
-    'TransmiExpert · Médiation, organisation et coordination patrimoniale — hors conseil juridique réglementé.'
+    'TransmiExpert : médiation, organisation et coordination patrimoniale, hors conseil juridique réglementé.'
   );
+}
+
+
+/**
+ * NOUVELLE PAGE V4.2 — page de garde « Ce livret appartient à ».
+ * La première chose qu'on lit en ouvrant le livre : l'objet devient personnel,
+ * et celui qui le trouve un jour sait quoi en faire.
+ */
+export function generateBelongsPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  doc.rect(0, 0, page.width, page.height).fill(colors.IVORY);
+  doc.rect(0, 0, PDF_THEME.sectionBand.width, page.height).fill(colors.FOREST);
+
+  const centerX = page.width / 2;
+  const ownerName = data.identity
+    ? [data.identity.prenoms, data.identity.nom_usage || data.identity.nom_naissance].filter(Boolean).join(' ')
+    : undefined;
+
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text('CE LIVRET APPARTIENT À', 0, page.height * 0.22, {
+      width: page.width,
+      align: 'center',
+      characterSpacing: 1.5,
+    });
+
+  if (!isBlankMode() && ownerName) {
+    doc
+      .fontSize(fonts.size.xlarge)
+      .font(fonts.headingItalic)
+      .fillColor(colors.INK)
+      .text(ownerName, 0, page.height * 0.22 + 34, { width: page.width, align: 'center' });
+  } else {
+    doc
+      .strokeColor(colors.BORDER)
+      .lineWidth(0.5)
+      .moveTo(centerX - 120, page.height * 0.22 + 64)
+      .lineTo(centerX + 120, page.height * 0.22 + 64)
+      .stroke();
+  }
+
+  const bodyY = page.height * 0.40;
+  doc
+    .fontSize(fonts.size.body)
+    .font(fonts.body)
+    .fillColor(colors.INK)
+    .text(
+      isBlankMode()
+        ? 'Ce livret rassemble ce que son propriétaire choisit d’y confier. S’il vous est remis un jour, c’est qu’il vous fait confiance pour en faire bon usage : prenez le temps de le lire : tout ce qui compte y est organisé.'
+        : 'Il a été préparé avec elle ou lui, à partir de ce qui a été choisi d’y être confié. Si ce livret vous est remis un jour, c’est qu’on vous fait confiance pour en faire bon usage : prenez le temps de le lire : tout ce qui compte y est déjà organisé.',
+      page.margin.left + 16,
+      bodyY,
+      { width: page.width - page.margin.left - page.margin.right - 32, align: 'center', lineGap: 3 }
+    );
+
+  doc
+    .strokeColor(colors.BORDER)
+    .lineWidth(0.5)
+    .moveTo(centerX - 100, page.height * 0.62)
+    .lineTo(centerX + 100, page.height * 0.62)
+    .stroke();
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.italic)
+    .fillColor(colors.GREY)
+    .text('Signature : pour faire de ce livret le vôtre, à l’encre.', 0, page.height * 0.62 + 8, {
+      width: page.width,
+      align: 'center',
+    });
+
+  // Épigraphe demandée par Luc (27/07/2026) : citation créole de Luc-Hubert Séjor sur la
+  // dynamique des conflits au moment du partage. Graphie transmise par Luc — variantes
+  // notées : « Sélé ni bien à séparer, ké nou ka sav kimoun ki kimoun. » /
+  // « Tant que o poko sépare bien, o poko sav kimoun ki bien, bien, bien. »
+  // La graphie FINALE reste à confirmer avec Luc avant impression.
+  const epigraphY = page.height * 0.74;
+  doc
+    .fontSize(fonts.size.medium)
+    .font(fonts.italic)
+    .fillColor(colors.FOREST)
+    .text('« Sélé ki ni bien à séparer, ké nou ka sav kimoun ki bien. »', page.margin.left, epigraphY, {
+      width: page.width - page.margin.left - page.margin.right,
+      align: 'center',
+      lineGap: 3,
+    });
+  doc
+    .fontSize(fonts.size.small)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text('C’est quand il y a des biens à partager qu’on découvre qui est qui.', page.margin.left, doc.y + 6, {
+      width: page.width - page.margin.left - page.margin.right,
+      align: 'center',
+    });
+  doc
+    .fontSize(fonts.size.small)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text('— Luc-Hubert Séjor', page.margin.left, doc.y + 4, {
+      width: page.width - page.margin.left - page.margin.right,
+      align: 'center',
+    });
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.italic)
+    .fillColor(colors.GREY)
+    .text(
+      'Ce livret existe pour déjouer ce proverbe : que le moment venu, les vôtres n’aient rien à découvrir, seulement à se souvenir.',
+      page.margin.left + 20,
+      doc.y + 10,
+      { width: page.width - page.margin.left - page.margin.right - 40, align: 'center', lineGap: 2 }
+    );
+
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text(String(pageNumber).padStart(2, '0'), 0, page.height - 42, { width: page.width, align: 'center' });
+}
+
+/**
+ * NOUVELLE PAGE V4.2 — sommaire. Pagination FIXE par construction (48 pages) :
+ * si l'ordre des pages change dans generator.ts, mettre ce sommaire à jour.
+ */
+export function generateTOCPage(doc: PDFDoc, data: CaseFileData, pageNumber: number) {
+  doc.addPage();
+  addPageChrome(doc, { section: 'ouverture', pageNumber });
+
+  let y = addPageTitle(doc, page.margin.top, { kicker: 'Pour vous repérer', title: 'Sommaire' });
+
+  const entries: Array<[string, string, boolean]> = [
+    ['Le mot de Luc', '04', false],
+    ['Le cadre de notre accompagnement', '05', false],
+    ['I. Vous et les vôtres', '06', true],
+    ['Votre profil, votre famille, votre arbre', '07', false],
+    ['Contacts, personnes de confiance, l’imprévu', '10', false],
+    ['II. Votre patrimoine', '13', true],
+    ['Biens, la maison familiale, comptes, dettes', '15', false],
+    ['Entreprise, donations, objets et souvenirs', '19', false],
+    ['L’histoire de nos biens, indivisions, repères fonciers', '22', false],
+    ['III. Documents & sécurité', '26', true],
+    ['Vos documents, pièces à réunir', '27', false],
+    ['Vie numérique, volontés et urgence', '29', false],
+    ['IV. Décisions & méthode', '31', true],
+    ['Objectifs, décisions en cours', '32', false],
+    ['Réunion familiale, la famille à distance', '34', false],
+    ['Compte-rendu, plan d’action, notes', '36', false],
+    ['V. Clôture', '39', true],
+    ['Où en est votre dossier, un mot pour les vôtres', '40', false],
+    ['Résumé à partager, les dix premiers jours', '42', false],
+    ['Où s’adresser, votre rendez-vous annuel', '44', false],
+    ['Un livre vivant', '47', false],
+  ];
+
+  const width = page.width - page.margin.left - page.margin.right;
+  entries.forEach(([label, num, isSection]) => {
+    const rowY = y;
+    doc
+      .fontSize(isSection ? fonts.size.medium : fonts.size.body)
+      .font(isSection ? fonts.heading : fonts.body)
+      .fillColor(isSection ? colors.FOREST : colors.INK)
+      .text(label, page.margin.left, rowY, { width: width - 40 });
+    doc
+      .fontSize(isSection ? fonts.size.medium : fonts.size.body)
+      .font(isSection ? fonts.heading : fonts.body)
+      .fillColor(isSection ? colors.GOLD : colors.GREY)
+      .text(num, page.margin.left, rowY, { width, align: 'right' });
+    y = doc.y + (isSection ? spacing.md : spacing.sm);
+    if (isSection) {
+      doc
+        .strokeColor(colors.BORDER)
+        .lineWidth(0.5)
+        .moveTo(page.margin.left, y - 4)
+        .lineTo(page.margin.left + width, y - 4)
+        .stroke();
+    }
+  });
 }

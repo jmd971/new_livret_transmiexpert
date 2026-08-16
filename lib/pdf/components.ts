@@ -459,7 +459,7 @@ export function addPullQuote(doc: PDFDoc, y: number, quote: string, attribution?
 export function addWatermark(doc: PDFDoc, text: string) {
   doc.save();
   doc
-    .fontSize(120)
+    .fontSize(84) // recalibré pour le format livre 16×24 (V4.2)
     .font(fonts.heading)
     .fillColor(colors.IVORY_DARK)
     .opacity(0.5)
@@ -480,6 +480,88 @@ export function addPostureNote(doc: PDFDoc, y: number, text: string): number {
     .fillColor(colors.GREY)
     .text(text, page.margin.left, y, { width: getUsableWidth(), lineGap: 1 });
   return doc.y;
+}
+
+/**
+ * V4.2 — Intercalaire de section : la respiration qui fait « livre ».
+ * Numéro romain, proverbe créole (⚠️ graphies à faire valider par Luc, cf. theme.ts),
+ * traduction, puis une phrase d'entrée. Aucune donnée client : la page est identique
+ * dans les trois éditions (personnelle, vierge, démonstration).
+ */
+export function addSectionDivider(
+  doc: PDFDoc,
+  opts: {
+    section: SectionKey;
+    pageNumber: number;
+    roman: string;
+    proverb: string;
+    translation: string;
+    intro: string;
+  }
+) {
+  doc.addPage();
+  doc.rect(0, 0, page.width, page.height).fill(colors.IVORY);
+  doc.rect(0, 0, PDF_THEME.sectionBand.width, page.height).fill(colors.FOREST);
+
+  const centerBlockY = page.height * 0.24;
+
+  doc
+    .fontSize(56)
+    .font(fonts.headingItalic)
+    .fillColor(colors.GOLD)
+    .text(opts.roman, 0, centerBlockY, { width: page.width, align: 'center' });
+
+  doc
+    .fontSize(fonts.size.large)
+    .font(fonts.heading)
+    .fillColor(colors.INK)
+    .text(SECTION_LABELS[opts.section], 0, doc.y + spacing.sm, { width: page.width, align: 'center' });
+
+  const ruleY = doc.y + spacing.lg;
+  doc
+    .strokeColor(colors.GOLD)
+    .lineWidth(1)
+    .moveTo(page.width / 2 - 34, ruleY)
+    .lineTo(page.width / 2 + 34, ruleY)
+    .stroke();
+
+  const proverbX = page.margin.left + 18;
+  const proverbWidth = page.width - proverbX * 2;
+  doc
+    .fontSize(fonts.size.large)
+    .font(fonts.italic)
+    .fillColor(colors.FOREST)
+    .text(`« ${opts.proverb} »`, proverbX, ruleY + spacing.xxl, {
+      width: proverbWidth,
+      align: 'center',
+      lineGap: 3,
+    });
+
+  doc
+    .fontSize(fonts.size.small)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text(opts.translation, proverbX, doc.y + spacing.sm, { width: proverbWidth, align: 'center' });
+
+  doc
+    .fontSize(fonts.size.body)
+    .font(fonts.body)
+    .fillColor(colors.INK)
+    .text(opts.intro, page.margin.left + 8, page.height * 0.66, {
+      width: page.width - page.margin.left - page.margin.right - 16,
+      align: 'center',
+      lineGap: 3,
+    });
+
+  // Pied de page minimal (pas de chrome complet sur un intercalaire)
+  doc
+    .fontSize(fonts.size.tiny)
+    .font(fonts.body)
+    .fillColor(colors.GREY)
+    .text(String(opts.pageNumber).padStart(2, '0'), 0, page.height - 42, {
+      width: page.width,
+      align: 'center',
+    });
 }
 
 export function checkPageBreak(doc: PDFDoc, currentY: number, neededHeight: number): boolean {
